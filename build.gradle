@@ -1,0 +1,63 @@
+plugins {
+	id 'java'
+	id 'org.springframework.boot' version '2.7.6'
+	id 'io.spring.dependency-management' version '1.1.0'
+	id 'com.diffplug.spotless' version '6.12.0'
+	id 'jvm-test-suite'
+}
+
+group = 'com.epam.cloudx.aws'
+version = '0.0.1'
+sourceCompatibility = '11'
+
+configurations {
+	compileOnly {
+		extendsFrom annotationProcessor
+	}
+}
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+	//Spring Boot
+	implementation 'org.springframework.boot:spring-boot-starter'
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+
+	//AWS SDK
+	implementation platform('software.amazon.awssdk:bom:2.18.41')
+
+	//Others
+	implementation 'org.mapstruct:mapstruct:1.5.3.Final'
+	implementation 'org.apache.commons:commons-lang3:3.12.0'
+
+	//Preprocessors
+	compileOnly 'org.projectlombok:lombok'
+	annotationProcessor 'org.projectlombok:lombok'
+	annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.3.Final'
+
+	//Test
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+}
+
+testing {
+	suites {
+		//'test' suite is created by default
+		integrationTest(JvmTestSuite) {
+			dependencies {
+				implementation project()
+				implementation 'org.springframework.boot:spring-boot-starter-test'
+			}
+			testType = TestSuiteType.INTEGRATION_TEST
+		}
+	}
+}
+
+spotless {
+	java {
+		importOrder()
+		removeUnusedImports()
+	}
+}
+

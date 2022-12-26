@@ -1,0 +1,7 @@
+spring:
+  jackson:
+    default-property-inclusion: non_null
+
+book-api:
+  validation:
+    min-published-year: 1800
