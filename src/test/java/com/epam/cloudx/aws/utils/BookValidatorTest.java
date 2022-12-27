@@ -5,11 +5,10 @@ import com.epam.cloudx.aws.exceptions.BookValidationException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import static com.epam.cloudx.aws.utils.BookTestUtils.testBook;
 import static org.junit.jupiter.api.Assertions.*;
 
 class BookValidatorTest {
-
-    private static final String TEST_ISBN = "1-84356-028-3";
 
     private BookValidator validator;
 
@@ -48,13 +47,6 @@ class BookValidatorTest {
         assertEquals(1, e.getErrorContext().size());
     }
 
-    private Book testBook() {
-        return Book.builder()
-                .isbn(TEST_ISBN)
-                .title("Some book")
-                .author("Some author")
-                .publishYear(2002)
-                .build();
-    }
+
 
 }

@@ -1,6 +1,9 @@
 package com.epam.cloudx.aws.controllers;
 
+import com.epam.cloudx.aws.controllers.dto.BookRequest;
+import com.epam.cloudx.aws.controllers.dto.BookResponse;
 import com.epam.cloudx.aws.domain.Book;
+import com.epam.cloudx.aws.mappers.BookMapper;
 import com.epam.cloudx.aws.services.BookService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -14,37 +17,32 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
-
 @RestController
 @RequestMapping("/api/v1/books")
 @RequiredArgsConstructor
 public class BookController {
 
     private final BookService bookService;
-
-    @GetMapping("/")
-    @ResponseStatus(HttpStatus.OK)
-    public List<Book> getBooks() {
-        return bookService.getBooks();
-    }
+    private final BookMapper bookMapper;
 
     @GetMapping("/{isbn}")
     @ResponseStatus(HttpStatus.OK)
-    public Book getBookByIsbn(@PathVariable String isbn) {
-        return bookService.getBookByIsbn(isbn);
+    public BookResponse getBook(@PathVariable String isbn) {
+        return bookMapper.mapToBookResponse(bookService.getBook(isbn));
     }
 
     @PostMapping("/")
     @ResponseStatus(HttpStatus.CREATED)
-    public Book createBook(@RequestBody Book book) {
-        return bookService.createBook(book);
+    public BookResponse createBook(@RequestBody BookRequest bookRequest) {
+        Book book = bookMapper.mapToBook(bookRequest);
+        return bookMapper.mapToBookResponse(bookService.createBook(book));
     }
 
     @PutMapping("/{isbn}")
     @ResponseStatus(HttpStatus.OK)
-    public Book updateBook(@PathVariable String isbn, @RequestBody Book book) {
-        return bookService.updateBook(isbn, book);
+    public BookResponse updateBook(@PathVariable String isbn, @RequestBody BookRequest bookRequest) {
+        Book book = bookMapper.mapToBook(bookRequest);
+        return bookMapper.mapToBookResponse(bookService.updateBook(isbn, book));
     }
 
     @DeleteMapping("/{isbn}")

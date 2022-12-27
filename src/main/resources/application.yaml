@@ -9,8 +9,8 @@ infrastructure:
   aws-region: ${AWS_REGION}
   book-data-table:
     name: ${AWS_DYNAMODB_BOOK_DATA_TABLE_NAME}
-
   book-images-bucket:
+    url: ${AWS_S3_BOOK_IMAGES_BUCKET_URL}
     name: ${AWS_S3_BOOK_IMAGES_BUCKET_NAME}
 
 book-api:

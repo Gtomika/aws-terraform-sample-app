@@ -28,7 +28,7 @@ dependencies {
 	//AWS SDK
 	implementation platform('software.amazon.awssdk:bom:2.18.41')
 	implementation 'software.amazon.awssdk:s3'
-	implementation 'software.amazon.awssdk:dynamodb'
+	implementation 'software.amazon.awssdk:dynamodb-enhanced'
 	implementation 'software.amazon.awssdk:ses'
 
 	//Others

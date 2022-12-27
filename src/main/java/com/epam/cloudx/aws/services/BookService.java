@@ -3,13 +3,10 @@ package com.epam.cloudx.aws.services;
 import com.epam.cloudx.aws.domain.Book;
 import com.epam.cloudx.aws.exceptions.BookDuplicationException;
 import com.epam.cloudx.aws.exceptions.BookNotFoundException;
-import com.epam.cloudx.aws.exceptions.BookValidationException;
 import com.epam.cloudx.aws.repositories.BookRepository;
 import com.epam.cloudx.aws.utils.BookValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -18,27 +15,30 @@ public class BookService {
     private final BookRepository bookRepository;
     private final BookValidator bookValidator;
 
-    public List<Book> getBooks() {
-        //TODO it would be probably better to paginate this response
-        return null; //TODO
+    public Book getBook(String isbn) {
+        return bookRepository.getBook(isbn);
     }
 
-    public Book getBookByIsbn(String isbn) throws BookNotFoundException {
-        return null; //TODO
-    }
-
-    public Book createBook(Book book) throws BookDuplicationException, BookValidationException {
+    public Book createBook(Book book) {
         bookValidator.validateBookCreateRequest(book);
-        return null; //TODO
+        if(!bookRepository.existsByIsbn(book.getIsbn())) {
+            return bookRepository.createOrUpdateBook(book);
+        } else {
+            throw new BookDuplicationException(book.getIsbn());
+        }
     }
 
-    public Book updateBook(String isbn, Book book) throws BookNotFoundException, BookValidationException {
+    public Book updateBook(String isbn, Book book) {
         bookValidator.validateBookUpdateRequest(isbn, book);
-        return null; //TODO
+        if(bookRepository.existsByIsbn(book.getIsbn())) {
+            return bookRepository.createOrUpdateBook(book);
+        } else {
+            throw new BookNotFoundException(isbn);
+        }
     }
 
-    public void deleteBook(String isbn) throws BookNotFoundException {
-        //TODO
+    public void deleteBook(String isbn) {
+        bookRepository.deleteBook(isbn);
     }
 
 }

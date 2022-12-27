@@ -1,7 +1,7 @@
 package com.epam.cloudx.aws.controllers.advice;
 
 import com.epam.cloudx.aws.controllers.BookController;
-import com.epam.cloudx.aws.domain.BookApiError;
+import com.epam.cloudx.aws.controllers.dto.BookApiErrorResponse;
 import com.epam.cloudx.aws.exceptions.BookDuplicationException;
 import com.epam.cloudx.aws.exceptions.BookNotFoundException;
 import com.epam.cloudx.aws.exceptions.BookValidationException;
@@ -20,19 +20,19 @@ public class BookControllerAdvice {
 
     @ExceptionHandler(BookDuplicationException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public BookApiError handleBookDuplication(BookDuplicationException e) {
+    public BookApiErrorResponse handleBookDuplication(BookDuplicationException e) {
         return exceptionMapper.mapException(e);
     }
 
     @ExceptionHandler(BookNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public BookApiError handleBookNotFound(BookNotFoundException e) {
+    public BookApiErrorResponse handleBookNotFound(BookNotFoundException e) {
         return exceptionMapper.mapException(e);
     }
 
     @ExceptionHandler(BookValidationException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public BookApiError handleBookValidation(BookValidationException e) {
+    public BookApiErrorResponse handleBookValidation(BookValidationException e) {
         return exceptionMapper.mapException(e);
     }
 
