@@ -1,0 +1,22 @@
+version: '3.6'
+name: aws-sample-local
+
+services:
+  localstack:
+    container_name: localstack
+    environment:
+      - DEBUG=1
+      - LOCALSTACK_HOSTNAME=localhost
+      - TEST_AWS_ACCOUNT_ID=000000000000
+      - AWS_DEFAULT_REGION=eu-central-1
+      - DOCKER_HOST=unix:///var/run/docker.sock
+      - DATA_DIR=/tmp/localstack/data
+      - EDGE_PORT=4566
+      - SERVICES=dynamodb,s3,ses
+    image: localstack/localstack:latest
+    ports:
+      - "4566:4566"
+    volumes:
+      # copy AWS init script into the appropriate folder
+      - ./local-aws-init.sh:/etc/localstack/init/ready.d/local-aws-init.sh
+      - /var/run/docker.sock:/var/run/docker.sock

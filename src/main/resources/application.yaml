@@ -1,6 +1,17 @@
 spring:
+  profiles:
+    active:
+      - ${ENVIRONMENT}
   jackson:
     default-property-inclusion: non_null
+
+infrastructure:
+  aws-region: ${AWS_REGION}
+  dynamo-db:
+    url: ${DYNAMO_DB_URL}
+
+  s3-bucket:
+    url: ${S3_BUCKET_URL}
 
 book-api:
   validation:
