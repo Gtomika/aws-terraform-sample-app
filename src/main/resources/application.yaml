@@ -7,11 +7,11 @@ spring:
 
 infrastructure:
   aws-region: ${AWS_REGION}
-  dynamo-db:
-    url: ${DYNAMO_DB_URL}
+  book-data-table:
+    name: ${AWS_DYNAMODB_BOOK_DATA_TABLE_NAME}
 
-  s3-bucket:
-    url: ${S3_BUCKET_URL}
+  book-images-bucket:
+    name: ${AWS_S3_BOOK_IMAGES_BUCKET_NAME}
 
 book-api:
   validation:
