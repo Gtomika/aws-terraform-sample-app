@@ -48,20 +48,24 @@ public class BookImagesService {
      * @param isbn Book ISBN from which key is generated.
      * @param image Path to image which must exist.
      * @param contentType Content type of the image such as "image/png". Must be validated here.
+     * @param contentLength Content size in bytes as received.
      * @return S3 key of the uploaded image.
      */
-    public String uploadImage(String isbn, Path image, String contentType) {
+    public String uploadImage(String isbn, Path image, String contentType, long contentLength) {
         try {
             String s3Key = keyFromIsbn(isbn, contentType);
             PutObjectRequest uploadRequest = PutObjectRequest.builder()
                     .bucket(bookImagesBucket)
                     .key(s3Key)
                     .contentType(contentType)
+                    .contentLength(contentLength)
                     .build();
             s3Client.putObject(uploadRequest, image);
+            log.debug("New image uploaded for book with ISBN '{}'. S3 Key: '{}'", isbn, s3Key);
             return s3Key;
         } catch (SdkException e) {
-            throw new BookApiException(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+            logAndThrow("Failed to upload image to S3", e);
+            return null;
         }
     }
 
@@ -76,8 +80,9 @@ public class BookImagesService {
                     .key(s3Key)
                     .build();
             s3Client.deleteObject(deleteRequest);
+            log.debug("Book image with key '{}' was deleted", s3Key);
         } catch (SdkException e) {
-            throw new BookApiException(e.getMessage(),  HttpStatus.INTERNAL_SERVER_ERROR);
+            logAndThrow("Failed to delete image from S3", e);
         }
     }
 
@@ -94,5 +99,10 @@ public class BookImagesService {
     @Value("${infrastructure.book-images-bucket.name}")
     public void setBookImagesBucket(String bookImagesBucket) {
         this.bookImagesBucket = bookImagesBucket;
+    }
+
+    private void logAndThrow(String message, Exception e) {
+        log.error(message, e);
+        throw new BookApiException(message, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }

@@ -1,0 +1,7 @@
+infrastructure:
+  # endpoint of the localstack container
+  aws-endpoint: http://localhost:4566
+
+logging:
+  level:
+    com.epam.cloudx.aws: DEBUG

@@ -7,9 +7,9 @@ import com.epam.cloudx.aws.mappers.BookMapper;
 import com.epam.cloudx.aws.services.BookService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -48,7 +48,7 @@ public class BookController {
         return bookMapper.mapToBookResponse(bookService.updateBook(isbn, book));
     }
 
-    @PatchMapping("/{isbn}/image")
+    @PostMapping(value = "/{isbn}/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseStatus(HttpStatus.OK)
     public BookResponse updateBookImage(@PathVariable String isbn, @RequestParam MultipartFile image) {
         return bookMapper.mapToBookResponse(bookService.updateBookImage(isbn, image));

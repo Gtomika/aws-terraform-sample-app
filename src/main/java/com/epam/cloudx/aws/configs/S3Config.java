@@ -1,5 +1,6 @@
 package com.epam.cloudx.aws.configs;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -9,6 +10,7 @@ import software.amazon.awssdk.services.s3.S3Client;
 
 import java.net.URI;
 
+@Slf4j
 @Configuration
 public class S3Config {
 
@@ -26,6 +28,9 @@ public class S3Config {
                 .build();
     }
 
+    @Value("${infrastructure.aws-endpoint}")
+    private String awsEndpoint;
+
     /**
      * For local setup, the endpoint of the localstack container must be used.
      * The localstack does not require authentication.
@@ -33,8 +38,10 @@ public class S3Config {
     @Bean
     @Profile("dev | integrationTest")
     public S3Client s3ClientDev() {
+        log.debug("Connecting to S3 on '{}'", awsEndpoint);
         return S3Client.builder()
-                .endpointOverride(URI.create("http://localhost:4566"))
+                .endpointOverride(URI.create(awsEndpoint))
+                .region(Region.of(awsRegion))
                 .build();
     }
 

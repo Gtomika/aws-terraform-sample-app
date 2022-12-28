@@ -1,13 +1,17 @@
 package com.epam.cloudx.aws.repositories;
 
 import com.epam.cloudx.aws.domain.Book;
+import com.epam.cloudx.aws.exceptions.BookApiException;
 import com.epam.cloudx.aws.exceptions.BookNotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Repository;
+import software.amazon.awssdk.core.exception.SdkException;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
 import software.amazon.awssdk.enhanced.dynamodb.Key;
-import software.amazon.awssdk.services.dynamodb.model.ResourceNotFoundException;
 
+@Slf4j
 @Repository
 @RequiredArgsConstructor
 public class BookRepository {
@@ -18,7 +22,8 @@ public class BookRepository {
         try {
             Book book = bookTable.getItem(keyFromIsbn(isbn));
             return book != null;
-        } catch (ResourceNotFoundException e) {
+        } catch (SdkException e) {
+            logAndThrow("Error while checking book existence", e);
             return false;
         }
     }
@@ -30,21 +35,27 @@ public class BookRepository {
                 throw new BookNotFoundException(isbn);
             }
             return book;
-        } catch (ResourceNotFoundException e) {
-            throw new BookNotFoundException(isbn);
+        } catch (SdkException e) {
+            logAndThrow("Error while fetching book", e);
+            return null;
         }
     }
 
     public Book createOrUpdateBook(Book book) {
-        bookTable.putItem(book);
-        return book;
+        try {
+            bookTable.putItem(book);
+            return book;
+        } catch (SdkException e) {
+            logAndThrow("Error create/update of book", e);
+            return null;
+        }
     }
 
     public void deleteBook(String isbn) {
         try {
             bookTable.deleteItem(keyFromIsbn(isbn));
-        } catch (ResourceNotFoundException e) {
-            throw new BookNotFoundException(isbn);
+        } catch (SdkException e) {
+            logAndThrow("Error while deleting book", e);
         }
     }
 
@@ -52,6 +63,11 @@ public class BookRepository {
         return Key.builder()
                 .partitionValue(isbn)
                 .build();
+    }
+
+    private void logAndThrow(String message, SdkException e) {
+        log.error(message, e);
+        throw new BookApiException(message, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
 }

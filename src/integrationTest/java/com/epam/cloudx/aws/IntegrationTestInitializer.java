@@ -23,7 +23,7 @@ public class IntegrationTestInitializer {
     private static final String MOCK_TABLE_NAME = "EpamCloudxBookData";
 
     public static LocalStackContainer localStackContainer = new LocalStackContainer(instance()
-            .apply(parse("localstack/localstack:latest"))
+            .apply(parse("localstack/localstack:1.3.1"))
             .asCompatibleSubstituteFor("localstack/localstack"))
             .withServices(LocalStackContainer.Service.S3, LocalStackContainer.Service.DYNAMODB, LocalStackContainer.Service.SES)
             .withReuse(false);
@@ -41,9 +41,6 @@ public class IntegrationTestInitializer {
                 "aws.secretKey",
                 localStackContainer.getDefaultCredentialsProvider().getCredentials().getAWSSecretKey()
         );
-        System.setProperty("s3.endpoint", localStackContainer.getEndpointConfiguration(LocalStackContainer.Service.S3).getServiceEndpoint());
-        System.setProperty("s3.region", localStackContainer.getEndpointConfiguration(LocalStackContainer.Service.S3).getSigningRegion());
-        System.setProperty("aws.region", localStackContainer.getRegion());
 
         try {
             //TODO: find a way to run the shell script from 'local' folder here, and not copy paste commands
@@ -66,11 +63,13 @@ public class IntegrationTestInitializer {
         int localstackExposedPort = localStackContainer.getFirstMappedPort();
 
         registry.add("infrastructure.aws-region", () -> localStackContainer.getRegion());
+        registry.add("infrastructure.aws-endpoint", () -> "http://localhost:" + localstackExposedPort);
         registry.add("infrastructure.book-data-table.name", () -> MOCK_TABLE_NAME);
         registry.add("infrastructure.book-images-bucket.url", () -> String.format(
                 "http://localhost:%d/s3/%s", localstackExposedPort, MOCK_BUCKET_NAME
         ));
         registry.add("infrastructure.book-images-bucket.name", () -> MOCK_BUCKET_NAME);
+        registry.add("logging.level.com.epam.cloudx.aws", () -> "DEBUG");
     }
 
 }

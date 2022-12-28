@@ -5,7 +5,6 @@ Simple Book API that uses several AWS components:
  - EC2 instance to run the app.
  - DynamoDB to store book data.
  - S3 bucket to store book cover images.
- - SES to send book event notification emails.
  - VPN + subnet + elastic IP.
 
 All of these resources are provisioned using Terraform, which is applied through the 
@@ -31,3 +30,7 @@ docker-compose -f ./local/docker-compose.yml up
 
 Finally, the application can be started and it will use the ``localstack`` 
 instead of real AWS.
+
+**Warning**: The localstack S3 don't seem to be working well. It returns 500 
+internal error when trying to upload a file. Book image update is expected 
+not to work on the local machine because of this.

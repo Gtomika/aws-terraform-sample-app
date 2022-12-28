@@ -5,14 +5,12 @@ import com.epam.cloudx.aws.exceptions.BookDuplicationException;
 import com.epam.cloudx.aws.exceptions.BookImageInvalidException;
 import com.epam.cloudx.aws.exceptions.BookNotFoundException;
 import com.epam.cloudx.aws.repositories.BookRepository;
-import com.epam.cloudx.aws.utils.MockMultipartFile;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.nio.file.Path;
@@ -102,7 +100,7 @@ class BookServiceTest {
                 .thenReturn(expectedBook.getIsbn() + ".png");
         when(bookRepository.createOrUpdateBook(expectedBookWithImagePath)).thenReturn(expectedBookWithImagePath);
 
-        Book resultBook = bookService.updateBookImage(expectedBook.getIsbn(), new MockMultipartFile("image/png"));
+        Book resultBook = bookService.updateBookImage(expectedBook.getIsbn(), mockFile("image/png"));
         assertEquals(expectedBookWithImagePath, resultBook);
     }
 
@@ -114,7 +112,7 @@ class BookServiceTest {
         doThrow(BookImageInvalidException.class).when(bookImagesService).validateImage(any(MultipartFile.class));
 
         assertThrows(BookImageInvalidException.class, () ->
-                bookService.updateBookImage(expectedBook.getIsbn(), new MockMultipartFile("application/json")));
+                bookService.updateBookImage(expectedBook.getIsbn(), mockFile("application/json")));
     }
 
     @Test
@@ -124,7 +122,7 @@ class BookServiceTest {
         when(bookRepository.getBook(expectedBook.getIsbn())).thenThrow(BookNotFoundException.class);
 
         assertThrows(BookNotFoundException.class, () ->
-                bookService.updateBookImage(expectedBook.getIsbn(), new MockMultipartFile("image/png")));
+                bookService.updateBookImage(expectedBook.getIsbn(), mockFile("image/png")));
     }
 
     @Test
@@ -136,5 +134,9 @@ class BookServiceTest {
     public void shouldNotDeleteNotExistingBook() {
         doThrow(BookNotFoundException.class).when(bookRepository).deleteBook(TEST_ISBN);
         assertThrows(BookNotFoundException.class, () -> bookService.deleteBook(TEST_ISBN));
+    }
+
+    private MockMultipartFile mockFile(String contentType) {
+        return new MockMultipartFile("image", "image.png", contentType, new byte[]{1,2});
     }
 }

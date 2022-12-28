@@ -12,8 +12,9 @@ services:
       - DOCKER_HOST=unix:///var/run/docker.sock
       - DATA_DIR=/tmp/localstack/data
       - EDGE_PORT=4566
-      - SERVICES=dynamodb,s3,ses
-    image: localstack/localstack:latest
+      - SERVICES=dynamodb,s3
+      - PROVIDER_OVERRIDE_S3=asf
+    image: localstack/localstack:1.3.1
     ports:
       - "4566:4566"
     volumes:

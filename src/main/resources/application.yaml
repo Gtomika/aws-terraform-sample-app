@@ -5,6 +5,7 @@ spring:
   jackson:
     default-property-inclusion: non_null
 
+
 infrastructure:
   aws-region: ${AWS_REGION}
   book-data-table:
@@ -16,3 +17,6 @@ infrastructure:
 book-api:
   validation:
     min-published-year: 1800
+logging:
+  level:
+    com.epam.cloudx.aws: ${LOG_LEVEL:INFO}
