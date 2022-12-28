@@ -1,8 +1,10 @@
 package com.epam.cloudx.aws.domain;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbBean;
@@ -14,6 +16,8 @@ import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbParti
 @ToString
 @EqualsAndHashCode
 @DynamoDbBean
+@NoArgsConstructor
+@AllArgsConstructor
 public class Book {
     /**
      * International standard book number,

@@ -1,10 +1,10 @@
-package com.epam.cloudx.aws.utils;
+package com.epam.cloudx.aws.services;
 
 import com.epam.cloudx.aws.domain.Book;
 import com.epam.cloudx.aws.exceptions.BookValidationException;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,14 +14,10 @@ import java.util.Objects;
  * Validates requests of the Book API. This may be
  * done also with the Spring validation somehow.
  */
-@Component
-public class BookValidator {
+@Service
+public class BookValidatorService {
 
-    private final int minPublishYear;
-
-    public BookValidator(@Value("${book-api.validation.min-published-year}") int minPublishYear) {
-        this.minPublishYear = minPublishYear;
-    }
+    private int minPublishYear;
 
     /**
      * @param book Book that will be created, if validation is successful.
@@ -59,4 +55,8 @@ public class BookValidator {
         }
     }
 
+    @Value("${book-api.validation.min-published-year}")
+    public void setMinPublishYear(int minPublishYear) {
+        this.minPublishYear = minPublishYear;
+    }
 }

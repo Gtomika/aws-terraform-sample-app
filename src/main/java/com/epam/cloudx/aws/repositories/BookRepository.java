@@ -16,8 +16,8 @@ public class BookRepository {
 
     public boolean existsByIsbn(String isbn) {
         try {
-            bookTable.getItem(keyFromIsbn(isbn));
-            return true;
+            Book book = bookTable.getItem(keyFromIsbn(isbn));
+            return book != null;
         } catch (ResourceNotFoundException e) {
             return false;
         }
@@ -25,7 +25,11 @@ public class BookRepository {
 
     public Book getBook(String isbn) {
         try {
-            return bookTable.getItem(keyFromIsbn(isbn));
+            Book book = bookTable.getItem(keyFromIsbn(isbn));
+            if(book == null) {
+                throw new BookNotFoundException(isbn);
+            }
+            return book;
         } catch (ResourceNotFoundException e) {
             throw new BookNotFoundException(isbn);
         }

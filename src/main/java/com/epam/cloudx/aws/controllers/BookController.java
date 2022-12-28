@@ -9,13 +9,16 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/api/v1/books")
@@ -31,7 +34,7 @@ public class BookController {
         return bookMapper.mapToBookResponse(bookService.getBook(isbn));
     }
 
-    @PostMapping("/")
+    @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public BookResponse createBook(@RequestBody BookRequest bookRequest) {
         Book book = bookMapper.mapToBook(bookRequest);
@@ -43,6 +46,12 @@ public class BookController {
     public BookResponse updateBook(@PathVariable String isbn, @RequestBody BookRequest bookRequest) {
         Book book = bookMapper.mapToBook(bookRequest);
         return bookMapper.mapToBookResponse(bookService.updateBook(isbn, book));
+    }
+
+    @PatchMapping("/{isbn}/image")
+    @ResponseStatus(HttpStatus.OK)
+    public BookResponse updateBookImage(@PathVariable String isbn, @RequestParam MultipartFile image) {
+        return bookMapper.mapToBookResponse(bookService.updateBookImage(isbn, image));
     }
 
     @DeleteMapping("/{isbn}")

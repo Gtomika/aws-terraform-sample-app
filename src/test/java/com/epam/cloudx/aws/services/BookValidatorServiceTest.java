@@ -1,20 +1,22 @@
-package com.epam.cloudx.aws.utils;
+package com.epam.cloudx.aws.services;
 
 import com.epam.cloudx.aws.domain.Book;
 import com.epam.cloudx.aws.exceptions.BookValidationException;
+import com.epam.cloudx.aws.services.BookValidatorService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static com.epam.cloudx.aws.utils.BookTestUtils.testBook;
 import static org.junit.jupiter.api.Assertions.*;
 
-class BookValidatorTest {
+class BookValidatorServiceTest {
 
-    private BookValidator validator;
+    private BookValidatorService validator;
 
     @BeforeEach
     public void setUp() {
-        validator = new BookValidator(1800);
+        validator = new BookValidatorService();
+        validator.setMinPublishYear(1800);
     }
 
     @Test

@@ -8,7 +8,7 @@ plugins {
 
 group = 'com.epam.cloudx.aws'
 version = '0.0.1'
-sourceCompatibility = '11'
+sourceCompatibility = JavaVersion.VERSION_11
 
 configurations {
 	compileOnly {
@@ -20,25 +20,33 @@ repositories {
 	mavenCentral()
 }
 
+ext {
+	awsSdkVersion = '2.19.4'
+	mapstructVersion = '1.5.3.Final'
+	testcontainersVersion = '1.17.6'
+	apacheCommonsVersion = '3.12.0'
+}
+
 dependencies {
 	//Spring Boot
 	implementation 'org.springframework.boot:spring-boot-starter'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 
 	//AWS SDK
-	implementation platform('software.amazon.awssdk:bom:2.18.41')
+	implementation platform('software.amazon.awssdk:bom:' + awsSdkVersion)
+	implementation 'com.amazonaws:aws-java-sdk-core:1.12.372'
 	implementation 'software.amazon.awssdk:s3'
 	implementation 'software.amazon.awssdk:dynamodb-enhanced'
 	implementation 'software.amazon.awssdk:ses'
 
 	//Others
-	implementation 'org.mapstruct:mapstruct:1.5.3.Final'
-	implementation 'org.apache.commons:commons-lang3:3.12.0'
+	implementation 'org.mapstruct:mapstruct:' + mapstructVersion
+	implementation 'org.apache.commons:commons-lang3:' + apacheCommonsVersion
 
 	//Preprocessors
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
-	annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.3.Final'
+	annotationProcessor 'org.mapstruct:mapstruct-processor:' + mapstructVersion
 
 	//Test
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
@@ -50,7 +58,30 @@ testing {
 		integrationTest(JvmTestSuite) {
 			dependencies {
 				implementation project()
+				//Spring Boot
 				implementation 'org.springframework.boot:spring-boot-starter-test'
+				implementation 'org.springframework.boot:spring-boot-starter'
+				implementation 'org.springframework.boot:spring-boot-starter-web'
+
+				//AWS SDK
+				implementation 'com.amazonaws:aws-java-sdk-core:1.12.372'
+				implementation 'software.amazon.awssdk:s3:' + awsSdkVersion
+				implementation 'software.amazon.awssdk:dynamodb-enhanced:' + awsSdkVersion
+				implementation 'software.amazon.awssdk:ses:' + awsSdkVersion
+
+				//Others
+				implementation 'org.mapstruct:mapstruct:' + mapstructVersion
+				implementation 'org.apache.commons:commons-lang3:' + apacheCommonsVersion
+
+				//Preprocessors
+				compileOnly 'org.projectlombok:lombok'
+				annotationProcessor 'org.projectlombok:lombok'
+				annotationProcessor 'org.mapstruct:mapstruct-processor:' + mapstructVersion
+
+				//Test containers
+				implementation "org.testcontainers:testcontainers:" + testcontainersVersion
+				implementation 'org.testcontainers:junit-jupiter:' + testcontainersVersion
+				implementation 'org.testcontainers:localstack:' + testcontainersVersion
 			}
 			testType = TestSuiteType.INTEGRATION_TEST
 		}

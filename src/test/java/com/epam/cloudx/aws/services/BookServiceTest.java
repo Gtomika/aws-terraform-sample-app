@@ -2,18 +2,28 @@ package com.epam.cloudx.aws.services;
 
 import com.epam.cloudx.aws.domain.Book;
 import com.epam.cloudx.aws.exceptions.BookDuplicationException;
+import com.epam.cloudx.aws.exceptions.BookImageInvalidException;
 import com.epam.cloudx.aws.exceptions.BookNotFoundException;
 import com.epam.cloudx.aws.repositories.BookRepository;
-import com.epam.cloudx.aws.utils.BookValidator;
+import com.epam.cloudx.aws.utils.MockMultipartFile;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.nio.file.Path;
 
 import static com.epam.cloudx.aws.utils.BookTestUtils.TEST_ISBN;
 import static com.epam.cloudx.aws.utils.BookTestUtils.testBook;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 
@@ -24,13 +34,16 @@ class BookServiceTest {
     private BookRepository bookRepository;
 
     @Mock
-    private BookValidator bookValidator;
+    private BookValidatorService bookValidatorService;
+
+    @Mock
+    private BookImagesService bookImagesService;
 
     private BookService bookService;
 
     @BeforeEach
     public void setUp() {
-        bookService = new BookService(bookRepository, bookValidator);
+        bookService = new BookService(bookRepository, bookValidatorService, bookImagesService);
     }
 
     @Test
@@ -76,6 +89,42 @@ class BookServiceTest {
         Book expectedBook = testBook();
         when(bookRepository.existsByIsbn(expectedBook.getIsbn())).thenReturn(false);
         assertThrows(BookNotFoundException.class, () -> bookService.updateBook(expectedBook.getIsbn(), expectedBook));
+    }
+
+    @Test
+    public void shouldUpdateBookImage() {
+        Book expectedBook = testBook();
+        Book expectedBookWithImagePath = testBook();
+        expectedBookWithImagePath.setImagePath(expectedBook.getIsbn() + ".png");
+
+        when(bookRepository.getBook(expectedBook.getIsbn())).thenReturn(expectedBook);
+        when(bookImagesService.uploadImage(anyString(), any(Path.class), anyString()))
+                .thenReturn(expectedBook.getIsbn() + ".png");
+        when(bookRepository.createOrUpdateBook(expectedBookWithImagePath)).thenReturn(expectedBookWithImagePath);
+
+        Book resultBook = bookService.updateBookImage(expectedBook.getIsbn(), new MockMultipartFile("image/png"));
+        assertEquals(expectedBookWithImagePath, resultBook);
+    }
+
+    @Test
+    public void shouldNotUpdateBookInvalidImage() {
+        Book expectedBook = testBook();
+
+        when(bookRepository.getBook(expectedBook.getIsbn())).thenReturn(expectedBook);
+        doThrow(BookImageInvalidException.class).when(bookImagesService).validateImage(any(MultipartFile.class));
+
+        assertThrows(BookImageInvalidException.class, () ->
+                bookService.updateBookImage(expectedBook.getIsbn(), new MockMultipartFile("application/json")));
+    }
+
+    @Test
+    public void shouldNotUpdateNotExistingBookImage() {
+        Book expectedBook = testBook();
+
+        when(bookRepository.getBook(expectedBook.getIsbn())).thenThrow(BookNotFoundException.class);
+
+        assertThrows(BookNotFoundException.class, () ->
+                bookService.updateBookImage(expectedBook.getIsbn(), new MockMultipartFile("image/png")));
     }
 
     @Test
