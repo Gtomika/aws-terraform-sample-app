@@ -8,6 +8,8 @@ import org.testcontainers.containers.localstack.LocalStackContainer;
 import java.io.IOException;
 import java.time.Duration;
 
+import static org.testcontainers.containers.localstack.LocalStackContainer.Service.DYNAMODB;
+import static org.testcontainers.containers.localstack.LocalStackContainer.Service.S3;
 import static org.testcontainers.utility.DockerImageName.parse;
 import static org.testcontainers.utility.ImageNameSubstitutor.instance;
 
@@ -25,7 +27,7 @@ public class IntegrationTestInitializer {
     public static LocalStackContainer localStackContainer = new LocalStackContainer(instance()
             .apply(parse("localstack/localstack:1.3.1"))
             .asCompatibleSubstituteFor("localstack/localstack"))
-            .withServices(LocalStackContainer.Service.S3, LocalStackContainer.Service.DYNAMODB, LocalStackContainer.Service.SES)
+            .withServices(S3, DYNAMODB)
             .withReuse(false);
 
     @BeforeAll
@@ -61,9 +63,12 @@ public class IntegrationTestInitializer {
     @DynamicPropertySource
     public static void props(DynamicPropertyRegistry registry) {
         int localstackExposedPort = localStackContainer.getFirstMappedPort();
+        String s3 = localStackContainer.getEndpointOverride(S3).toString();
+        String db = localStackContainer.getEndpointOverride(DYNAMODB).toString();
 
         registry.add("infrastructure.aws-region", () -> localStackContainer.getRegion());
-        registry.add("infrastructure.aws-endpoint", () -> "http://localhost:" + localstackExposedPort);
+        registry.add("infrastructure.s3-localstack-endpoint", () -> localStackContainer.getEndpointOverride(S3));
+        registry.add("infrastructure.dynamodb-localstack-endpoint", () -> localStackContainer.getEndpointOverride(DYNAMODB));
         registry.add("infrastructure.book-data-table.name", () -> MOCK_TABLE_NAME);
         registry.add("infrastructure.book-images-bucket.url", () -> String.format(
                 "http://localhost:%d/s3/%s", localstackExposedPort, MOCK_BUCKET_NAME

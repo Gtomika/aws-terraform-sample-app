@@ -1,6 +1,7 @@
-package com.epam.cloudx.aws.configs;
+package com.epam.cloudx.aws.configs.dev;
 
 import com.epam.cloudx.aws.domain.Book;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -11,9 +12,12 @@ import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 
+import java.net.URI;
+
+@Slf4j
 @Configuration
-@Profile("dev")
-public class DynamoDbConfig {
+@Profile("dev | integrationTest")
+public class DynamoDbDevConfig {
 
     @Value("${infrastructure.aws-region}")
     private String awsRegion;
@@ -21,10 +25,18 @@ public class DynamoDbConfig {
     @Value("${infrastructure.book-data-table.name}")
     private String bookTableName;
 
+    @Value("${infrastructure.dynamodb-localstack-endpoint}")
+    private String dynamodbLocalstackEndpoint;
+
+    /**
+     * For the dev client we must use the localstack endpoint.
+     */
     @Bean
-    public DynamoDbEnhancedClient dynamoDbClient() {
+    public DynamoDbEnhancedClient dynamoDbClientDev() {
+        log.debug("Connecting to localstack DynamoDB on '{}'", dynamodbLocalstackEndpoint);
         DynamoDbClient dynamoDbClient = DynamoDbClient.builder()
                 .region(Region.of(awsRegion))
+                .endpointOverride(URI.create(dynamodbLocalstackEndpoint))
                 .build();
         return DynamoDbEnhancedClient.builder()
                 .dynamoDbClient(dynamoDbClient)
@@ -32,8 +44,8 @@ public class DynamoDbConfig {
     }
 
     @Bean
-    public DynamoDbTable<Book> bookTable() {
-        return dynamoDbClient().table(bookTableName, TableSchema.fromBean(Book.class));
+    public DynamoDbTable<Book> bookTableDev() {
+        return dynamoDbClientDev().table(bookTableName, TableSchema.fromBean(Book.class));
     }
 
 }

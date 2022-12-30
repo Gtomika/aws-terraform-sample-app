@@ -2,6 +2,10 @@ variable "aws_region" {
   type = string
 }
 
+variable "aws_availability_zone" {
+  type = string
+}
+
 variable "aws_access_key" {
   type = string
   sensitive = true
