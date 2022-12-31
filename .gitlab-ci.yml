@@ -24,8 +24,8 @@ build-jar: # package app into runnable JAR
    - export GRADLE_USER_HOME=`pwd`/.gradle
    - chmod +x gradlew
    - ./gradlew bootJar
-   - export ARTIFACT_NAME = $(ls ./build/libs)
-   - echo $ARTIFACT_NAME >> package.env
+   - export ARTIFACT_NAME=$(ls ./build/libs)
+   - echo $ARTIFACT_NAME >> ./package.env
    - echo "Packaged app JAR $ARTIFACT_NAME"
   cache:
     key: "$CI_COMMIT_REF_NAME"
@@ -57,7 +57,7 @@ delete-jar: # cleanup job -> delete JAR from artifacts bucket
   script:
     - echo "Deleting artifact $ARTIFACT_NAME from s3 bucket $ARTIFACTS_BUCKET_NAME"
     - aws s3 rm s3://${ARTIFACTS_BUCKET_NAME}/$ARTIFACT_NAME
-    - echo "Artifact successfully removed
+    - echo "Artifact successfully removed from S3 bucket $ARTIFACTS_BUCKET_NAME"
   dependencies:
     - build-jar
     - upload-jar
@@ -68,6 +68,8 @@ delete-jar: # cleanup job -> delete JAR from artifacts bucket
 spotless-check:
   stage: test
   script:
+    - export GRADLE_USER_HOME=`pwd`/.gradle
+    - chmod +x gradlew
     - echo "Performing spotless check"
     - ./gradlew spotlessCheck
   except:
@@ -77,6 +79,8 @@ spotless-check:
 unit-test:
   stage: test
   script:
+    - export GRADLE_USER_HOME=`pwd`/.gradle
+    - chmod +x gradlew
     - echo "Running unit tests..."
     - ./gradlew test
   cache:
@@ -89,6 +93,8 @@ unit-test:
 integration-test:
   stage: test
   script:
+    - export GRADLE_USER_HOME=`pwd`/.gradle
+    - chmod +x gradlew
     - echo "Running integration tests..."
     - ./gradlew integrationTest
   cache:
