@@ -27,10 +27,9 @@ build-jar: # package app into runnable JAR
    - export ARTIFACT_JAR_NAME=$(ls ./build/libs)
    - echo "Packaged app JAR $ARTIFACT_JAR_NAME"
    - export ARTIFACT_NAME=${ARTIFACT_JAR_NAME%.jar}
-   - echo "Artifact name without .jar is - $ARTIFACT_NAME"
-   - export ARTIFACT_VERSIONED_NAME="$ARTIFACT_NAME_$CI_COMMIT_SHORT_SHA"
-   - echo "ARTIFACT_VERSIONED_NAME=$ARTIFACT_VERSIONED_NAME" >> ./package.env
-   - echo "Exporting $ARTIFACT_VERSIONED_NAME as variable for next jobs..."
+   - echo "Artifact name without .jar is $ARTIFACT_NAME"
+   - echo "ARTIFACT_NAME=$ARTIFACT_NAME" >> ./package.env
+   - echo "Exporting $ARTIFACT_NAME as variable for next jobs..."
   cache:
     key: "$CI_COMMIT_REF_NAME"
     paths:
@@ -39,20 +38,30 @@ build-jar: # package app into runnable JAR
   artifacts:
     paths:
       - build/libs
+      - ./package.env
     reports:
-      dotenv: package.env
+      dotenv: ./package.env
     expire_in: 1 hour
 
 upload-jar: # upload runnable JAR to S3 -> to be downloaded to EC2 instance
   stage: publish
   image: $AWS_CLI_IMAGE
   script:
-    - echo "Uploading artifact $ARTIFACT_VERSIONED_NAME.jar to S3 bucket $ARTIFACTS_BUCKET_NAME"
-    - aws s3 cp ./build/libs/$ARTIFACT_VERSIONED_NAME.jar s3://${ARTIFACTS_BUCKET_NAME}
+    - export ARTIFACT_VERSIONED_NAME="$ARTIFACT_NAME_$CI_COMMIT_SHORT_SHA"
+    - echo "Versioned artifact name based on commit hash is $ARTIFACT_VERSIONED_NAME"
+    - echo "Uploading artifact $ARTIFACT_NAME.jar as $ARTIFACT_VERSIONED_NAME.jar" to S3 bucket $ARTIFACTS_BUCKET_NAME"
+    - aws s3 cp ./build/libs/$ARTIFACT_NAME.jar s3://${ARTIFACTS_BUCKET_NAME}/$ARTIFACT_VERSIONED_NAME.jar
     - echo "Artifact upload successful"
+    - echo "ARTIFACT_VERSIONED_NAME=$ARTIFACT_VERSIONED_NAME" >> ./upload.env
+    - echo "Exporting $ARTIFACT_VERSIONED_NAME as variable for next jobs..."
   dependencies:
     - build-jar
-  only: # only do this when we pushed a tag
+  artifacts:
+    paths:
+      - ./upload.env
+    reports:
+      dotenv: ./upload.env
+  only:
     - main
 
 delete-jar: # cleanup job -> delete JAR from artifacts bucket
@@ -68,6 +77,7 @@ delete-jar: # cleanup job -> delete JAR from artifacts bucket
   only:
     - main
   when: manual
+  allow_failure: true
 
 spotless-check:
   stage: test
