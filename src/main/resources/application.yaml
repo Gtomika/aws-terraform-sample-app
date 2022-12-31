@@ -1,3 +1,6 @@
+server:
+  port: ${APP_PORT}
+
 spring:
   profiles:
     active:
@@ -20,3 +23,4 @@ book-api:
 logging:
   level:
     com.epam.cloudx.aws: ${LOG_LEVEL:INFO}
+

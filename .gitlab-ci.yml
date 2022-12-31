@@ -1,0 +1,99 @@
+stages:
+  - build # build app and upload JAR to S3
+  - publish # artifact management
+  - test # run tests and checks
+  - terraform # terraform init, fmt, plan
+  - deploy # terraform apply
+
+workflow:
+  rules: # avoid merge request event for general scope
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      when: never
+    - if: '$CI_PIPELINE_SOURCE == "push"'
+    - if: '$CI_PIPELINE_SOURCE == "web"'
+
+variables:
+  GRADLE_IMAGE: gradle:jdk11
+  AWS_CLI_IMAGE: amazon/aws-cli
+  TERRAFORM_IMAGE: todo
+
+build-jar: # package app into runnable JAR
+  stage: build
+  image: $GRADLE_IMAGE
+  script:
+   - export GRADLE_USER_HOME=`pwd`/.gradle
+   - chmod +x gradlew
+   - ./gradlew bootJar
+   - export ARTIFACT_NAME = $(ls ./build/libs)
+   - echo $ARTIFACT_NAME >> package.env
+   - echo "Packaged app JAR $ARTIFACT_NAME"
+  cache:
+    key: "$CI_COMMIT_REF_NAME"
+    paths:
+      - build
+      - .gradle
+  artifacts:
+    paths:
+      - build/libs
+    reports:
+      dotenv: package.env
+    expire_in: 1 hour
+
+upload-jar: # upload runnable JAR to S3 -> to be downloaded to EC2 instance
+  stage: publish
+  image: $AWS_CLI_IMAGE
+  script:
+    - echo "Uploading artifact $ARTIFACT_NAME to S3 bucket $ARTIFACTS_BUCKET_NAME"
+    - aws s3 cp ./build/libs/$ARTIFACT_NAME s3://${ARTIFACTS_BUCKET_NAME}
+    - echo "Artifact upload successful"
+  dependencies:
+    - build-jar
+  only: # only do this when we pushed a tag
+    - main
+
+delete-jar: # cleanup job -> delete JAR from artifacts bucket
+  stage: publish
+  image: $AWS_CLI_IMAGE
+  script:
+    - echo "Deleting artifact $ARTIFACT_NAME from s3 bucket $ARTIFACTS_BUCKET_NAME"
+    - aws s3 rm s3://${ARTIFACTS_BUCKET_NAME}/$ARTIFACT_NAME
+    - echo "Artifact successfully removed
+  dependencies:
+    - build-jar
+    - upload-jar
+  only:
+    - main
+  when: manual
+
+spotless-check:
+  stage: test
+  script:
+    - echo "Performing spotless check"
+    - ./gradlew spotlessCheck
+  except:
+    variables:
+      - $SKIP_SPOTLESS_CHECK
+
+unit-test:
+  stage: test
+  script:
+    - echo "Running unit tests..."
+    - ./gradlew test
+  cache:
+    key: "$CI_COMMIT_REF_NAME"
+    policy: pull
+    paths:
+      - build
+      - .gradle
+
+integration-test:
+  stage: test
+  script:
+    - echo "Running integration tests..."
+    - ./gradlew integrationTest
+  cache:
+    key: "$CI_COMMIT_REF_NAME"
+    policy: pull
+    paths:
+      - build
+      - .gradle

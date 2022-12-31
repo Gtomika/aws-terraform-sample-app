@@ -25,7 +25,7 @@ data "aws_iam_policy_document" "bucket_policy" {
     ]
     resources = [
       aws_s3_bucket.bucket.arn
-    ],
+    ]
     condition {
       test     = "StringNotEquals"
       values   = [
@@ -33,17 +33,17 @@ data "aws_iam_policy_document" "bucket_policy" {
       ]
       variable = "aws:PrincipalArn"
     }
-  },
+  }
   statement { # allow public access to GET the objects
     sid = "ObjectManagement"
     effect = "Allow"
     principals {
       identifiers = ["*"]
       type        = "*"
-    },
+    }
     actions = [
       "s3:GetObject"
-    ],
+    ]
     resources = [
       "${aws_s3_bucket.bucket.arn}/*"
     ]

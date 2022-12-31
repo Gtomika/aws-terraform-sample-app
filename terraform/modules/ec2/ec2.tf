@@ -38,11 +38,11 @@ resource "aws_security_group_rule" "allow_ssh" {
 
 data aws_iam_policy_document "iam_instance_policy_data" {
   statement { # Access to the book images S3 bucket objects
-    sid: "AccessToBucketObjects"
+    sid = "FullAccessToBucketObjects"
     effect = "Allow"
     resources = [
-      var.bucket_arn,
-      "${var.bucket_arn}/*"
+      var.images_bucket_arn,
+      "${var.images_bucket_arn}/*"
     ]
     actions = [
       "s3:ListBucket",
@@ -50,7 +50,7 @@ data aws_iam_policy_document "iam_instance_policy_data" {
     ]
   }
   statement { # Access to the book data DynamoDB table items
-    sid = "AccessToTableItems"
+    sid = "FullAccessToTableItems"
     effect = "Allow"
     resources = [ var.table_arn ]
     actions = [
@@ -59,6 +59,12 @@ data aws_iam_policy_document "iam_instance_policy_data" {
       "dynamodb:Scan",
       "dynamodb:*Item"
     ]
+  }
+  statement { # to be able to download app JAR
+    sid = "AllowGetFromArtifactsBucket"
+    effect = "Allow"
+    resources = [ "arn:aws:s3:::${var.artifacts_bucket_name}" ]
+    actions = [ "s3:GetObject" ]
   }
 }
 
@@ -73,7 +79,7 @@ data aws_iam_policy_document "iam_instance_assume_role_policy_data" {
     principals {
       type        = "Service"
       identifiers = ["ec2.amazonaws.com"]
-    },
+    }
     actions = [ "sts:AssumeRole" ]
   }
 }
@@ -125,6 +131,11 @@ resource "aws_network_interface" "network_interface" {
   ]
 }
 
+resource "aws_eip" "elastic_ip" {
+  network_interface = aws_network_interface.network_interface.id
+  vpc = true
+}
+
 resource "aws_instance" "instance" {
   name = "${var.application_name}-${var.aws_availability_zone}-${var.environment}"
   availability_zone = var.aws_availability_zone
@@ -139,21 +150,14 @@ resource "aws_instance" "instance" {
   key_name = aws_key_pair.instance_key_pair.key_name
   # to make it work, Terraform user requires "iam:PassRole" permission
   iam_instance_profile = aws_iam_instance_profile.iam_instance_profile.name
-  # TODO add permission to access artifacts bucket
-  # TODO add parameter for artifact name
   user_data = <<-EOF
   #!/bin/bash
   sudo apt update -y
   sudo amazon-linux-extras install java-openjdk11 -y
   mkdir -p server
   cd server
-  aws s3 cp s3://tamas-gaspar-epam-cloudx-artifacts/demo-0.0.1-SNAPSHOT.jar demo-0.0.1-SNAPSHOT.jar
-  java -Dspring.profiles.active=${var.environment} -jar demo-0.0.1-SNAPSHOT.jar
+  aws s3 cp s3://${var.artifacts_bucket_name}/${var.application_artifact_name} ${var.application_artifact_name}
+  java -Dspring.profiles.active=${var.environment} -jar ${var.application_artifact_name}
   EOF
   user_data_replace_on_change = true # Any change in user_data will recreate instance
-}
-
-resource "aws_eip" "elastic_ip" {
-  instance = aws_instance.instance.id
-  vpc = true
 }

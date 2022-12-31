@@ -7,7 +7,7 @@ plugins {
 }
 
 group = 'com.epam.cloudx.aws'
-version = '0.0.1'
+version = '1.0'
 sourceCompatibility = JavaVersion.VERSION_11
 
 configurations {
@@ -18,6 +18,10 @@ configurations {
 
 repositories {
 	mavenCentral()
+}
+
+jar { //disables '.plain' jar generation
+	enabled = false
 }
 
 ext {

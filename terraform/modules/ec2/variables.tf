@@ -34,14 +34,18 @@ variable "subnet_id" {
   type = string
 }
 
-variable "private_key_path" {
+variable "images_bucket_arn" {
   type = string
 }
 
-variable "bucket_arn" {
+variable "artifacts_bucket_name" {
   type = string
 }
 
 variable "table_arn" {
+  type = string
+}
+
+variable "application_artifact_name" {
   type = string
 }
