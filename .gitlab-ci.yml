@@ -20,15 +20,17 @@ variables:
 build-jar: # package app into runnable JAR
   stage: build
   image: $GRADLE_IMAGE
-  script: #dotenv cant handle '.' in variable value, so not using '.jar' in artifact name
+  script:
    - export GRADLE_USER_HOME=`pwd`/.gradle
    - chmod +x gradlew
    - ./gradlew bootJar
    - export ARTIFACT_JAR_NAME=$(ls ./build/libs)
    - echo "Packaged app JAR $ARTIFACT_JAR_NAME"
-   - echo ARTIFACT_NAME=${var%.jar}
-   - echo $ARTIFACT_NAME >> ./package.env
-   - echo "Exporting $ARTIFACT_NAME" as variable for next jobs..."
+   - export ARTIFACT_NAME=${ARTIFACT_JAR_NAME%.jar}
+   - echo "Artifact name without .jar is - $ARTIFACT_NAME"
+   - export ARTIFACT_VERSIONED_NAME="$ARTIFACT_NAME$CI_COMMIT_SHORT_SHA"
+   - echo $ARTIFACT_VERSIONED_NAME >> ./package.env
+   - echo "Exporting $ARTIFACT_VERSIONED_NAME as variable for next jobs..."
   cache:
     key: "$CI_COMMIT_REF_NAME"
     paths:
