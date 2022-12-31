@@ -31,7 +31,7 @@ build-jar: # package app into runnable JAR
    - echo "ARTIFACT_NAME=$ARTIFACT_NAME" >> ./package.env
    - echo "Exporting $ARTIFACT_NAME as variable for next jobs..."
   cache:
-    key: "$CI_COMMIT_REF_NAME"
+    key: "$CI_COMMIT_SHORT_SHA"
     paths:
       - build
       - .gradle
@@ -98,7 +98,7 @@ unit-test:
     - echo "Running unit tests..."
     - ./gradlew test
   cache:
-    key: "$CI_COMMIT_REF_NAME"
+    key: "$CI_COMMIT_SHORT_SHA"
     policy: pull
     paths:
       - build
@@ -112,7 +112,7 @@ integration-test:
     - echo "Running integration tests..."
     - ./gradlew integrationTest
   cache:
-    key: "$CI_COMMIT_REF_NAME"
+    key: "$CI_COMMIT_SHORT_SHA"
     policy: pull
     paths:
       - build
