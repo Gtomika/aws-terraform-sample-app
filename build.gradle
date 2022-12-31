@@ -24,6 +24,10 @@ jar { //disables '.plain' jar generation
 	enabled = false
 }
 
+bootJar { // dont include version in jar file name
+	project.version = ""
+}
+
 ext {
 	awsSdkVersion = '2.19.4'
 	mapstructVersion = '1.5.3.Final'

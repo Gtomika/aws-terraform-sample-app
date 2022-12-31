@@ -20,13 +20,15 @@ variables:
 build-jar: # package app into runnable JAR
   stage: build
   image: $GRADLE_IMAGE
-  script:
+  script: #dotenv cant handle '.' in variable value, so not using '.jar' in artifact name
    - export GRADLE_USER_HOME=`pwd`/.gradle
    - chmod +x gradlew
    - ./gradlew bootJar
-   - export ARTIFACT_NAME=$(ls ./build/libs)
+   - export ARTIFACT_JAR_NAME=$(ls ./build/libs)
+   - echo "Packaged app JAR $ARTIFACT_JAR_NAME"
+   - echo ARTIFACT_NAME=${var%.jar}
    - echo $ARTIFACT_NAME >> ./package.env
-   - echo "Packaged app JAR $ARTIFACT_NAME"
+   - echo "Exporting $ARTIFACT_NAME" as variable for next jobs..."
   cache:
     key: "$CI_COMMIT_REF_NAME"
     paths:
@@ -43,8 +45,8 @@ upload-jar: # upload runnable JAR to S3 -> to be downloaded to EC2 instance
   stage: publish
   image: $AWS_CLI_IMAGE
   script:
-    - echo "Uploading artifact $ARTIFACT_NAME to S3 bucket $ARTIFACTS_BUCKET_NAME"
-    - aws s3 cp ./build/libs/$ARTIFACT_NAME s3://${ARTIFACTS_BUCKET_NAME}
+    - echo "Uploading artifact $ARTIFACT_NAME.jar to S3 bucket $ARTIFACTS_BUCKET_NAME"
+    - aws s3 cp ./build/libs/$ARTIFACT_NAME.jar s3://${ARTIFACTS_BUCKET_NAME}
     - echo "Artifact upload successful"
   dependencies:
     - build-jar
@@ -55,8 +57,8 @@ delete-jar: # cleanup job -> delete JAR from artifacts bucket
   stage: publish
   image: $AWS_CLI_IMAGE
   script:
-    - echo "Deleting artifact $ARTIFACT_NAME from s3 bucket $ARTIFACTS_BUCKET_NAME"
-    - aws s3 rm s3://${ARTIFACTS_BUCKET_NAME}/$ARTIFACT_NAME
+    - echo "Deleting artifact $ARTIFACT_NAME.jar from s3 bucket $ARTIFACTS_BUCKET_NAME"
+    - aws s3 rm s3://${ARTIFACTS_BUCKET_NAME}/$ARTIFACT_NAME.jar
     - echo "Artifact successfully removed from S3 bucket $ARTIFACTS_BUCKET_NAME"
   dependencies:
     - build-jar
