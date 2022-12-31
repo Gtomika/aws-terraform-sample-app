@@ -49,7 +49,7 @@ upload-jar: # upload runnable JAR to S3 -> to be downloaded to EC2 instance
     - export ARTIFACT_VERSIONED_NAME="$ARTIFACT_NAME"_"$CI_COMMIT_SHORT_SHA"
     - echo Versioned artifact name based on commit hash is "$ARTIFACT_VERSIONED_NAME"
     - echo Uploading artifact "$ARTIFACT_NAME".jar as "$ARTIFACT_VERSIONED_NAME".jar to S3 bucket "$ARTIFACTS_BUCKET_NAME"
-    - aws s3 cp ./build/libs/$ARTIFACT_NAME.jar s3://${ARTIFACTS_BUCKET_NAME}/$ARTIFACT_VERSIONED_NAME.jar
+    - aws s3api put-object --bucket $ARTIFACTS_BUCKET_NAME --key "$ARTIFACT_VERSIONED_NAME".jar --body ./build/libs/"$ARTIFACT_NAME".jar
     - echo Artifact upload successful
     - echo "ARTIFACT_VERSIONED_NAME=$ARTIFACT_VERSIONED_NAME" >> ./upload.env
     - echo Exporting "$ARTIFACT_VERSIONED_NAME" as variable for next jobs...
@@ -67,7 +67,7 @@ delete-jar: # cleanup job -> delete JAR from artifacts bucket
   script:
     - export $(grep -v '^#' upload.env | xargs)
     - echo Deleting artifact "$ARTIFACT_VERSIONED_NAME".jar from s3 bucket "$ARTIFACTS_BUCKET_NAME"
-    - aws s3 rm s3://${ARTIFACTS_BUCKET_NAME}/$ARTIFACT_VERSIONED_NAME.jar
+    - aws s3 rm s3://"$ARTIFACTS_BUCKET_NAME"/"$ARTIFACT_VERSIONED_NAME".jar
     - echo Artifact successfully removed from S3 bucket "$ARTIFACTS_BUCKET_NAME"
   dependencies:
     - build-jar
