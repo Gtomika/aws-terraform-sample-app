@@ -1,5 +1,7 @@
 package com.epam.cloudx.aws.mappers;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import com.epam.cloudx.aws.controllers.dto.BookApiErrorResponse;
 import com.epam.cloudx.aws.exceptions.BookApiException;
 import org.junit.jupiter.api.Test;
@@ -8,8 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = MapperTestConfig.class)

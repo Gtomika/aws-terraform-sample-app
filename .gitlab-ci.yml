@@ -24,40 +24,29 @@ build-jar: # package app into runnable JAR
    - export GRADLE_USER_HOME=`pwd`/.gradle
    - chmod +x gradlew
    - ./gradlew bootJar
-   - export ARTIFACT_JAR_NAME=$(ls ./build/libs)
-   - echo Packaged app JAR "$ARTIFACT_JAR_NAME"
-   - export ARTIFACT_NAME=${ARTIFACT_JAR_NAME%????}
-   - echo Artifact name without .jar is "$ARTIFACT_NAME"
-   - echo "ARTIFACT_NAME=$ARTIFACT_NAME" >> ./package.env
-   - echo Exporting "$ARTIFACT_NAME" as variable for next jobs...
+   - echo Packaged app JAR "$APP_NAME".jar
   cache:
     key: "$CI_COMMIT_SHORT_SHA"
+    policy: push
     paths:
       - build
       - .gradle
   artifacts:
     paths:
       - build/libs
-      - ./package.env
     expire_in: 1 hour
 
 upload-jar: # upload runnable JAR to S3 -> to be downloaded to EC2 instance
   stage: publish
   image: $AWS_CLI_IMAGE
   script:
-    - export $(grep -v '^#' package.env | xargs)
-    - export ARTIFACT_VERSIONED_NAME="$ARTIFACT_NAME"_"$CI_COMMIT_SHORT_SHA"
+    - export ARTIFACT_VERSIONED_NAME="$APP_NAME"_"$CI_COMMIT_SHORT_SHA"
     - echo Versioned artifact name based on commit hash is "$ARTIFACT_VERSIONED_NAME"
-    - echo Uploading artifact "$ARTIFACT_NAME".jar as "$ARTIFACT_VERSIONED_NAME".jar to S3 bucket "$ARTIFACTS_BUCKET_NAME"
-    - aws s3api put-object --bucket $ARTIFACTS_BUCKET_NAME --key "$ARTIFACT_VERSIONED_NAME".jar --body ./build/libs/"$ARTIFACT_NAME".jar
+    - echo Uploading artifact "$APP_NAME".jar as "$ARTIFACT_VERSIONED_NAME".jar to S3 bucket "$ARTIFACTS_BUCKET_NAME"
+    - aws s3api put-object --bucket $ARTIFACTS_BUCKET_NAME --key "$ARTIFACT_VERSIONED_NAME".jar --body ./build/libs/"$APP_NAME".jar
     - echo Artifact upload successful
-    - echo "ARTIFACT_VERSIONED_NAME=$ARTIFACT_VERSIONED_NAME" >> ./upload.env
-    - echo Exporting "$ARTIFACT_VERSIONED_NAME" as variable for next jobs...
-  dependencies:
+  needs:
     - build-jar
-  artifacts:
-    paths:
-      - ./upload.env
   only:
     - main
 
@@ -65,15 +54,12 @@ delete-jar: # cleanup job -> delete JAR from artifacts bucket
   stage: publish
   image: $AWS_CLI_IMAGE
   script:
-    - export $(grep -v '^#' upload.env | xargs)
+    - export ARTIFACT_VERSIONED_NAME="$APP_NAME"_"$CI_COMMIT_SHORT_SHA"
     - echo Deleting artifact "$ARTIFACT_VERSIONED_NAME".jar from s3 bucket "$ARTIFACTS_BUCKET_NAME"
     - aws s3 rm s3://"$ARTIFACTS_BUCKET_NAME"/"$ARTIFACT_VERSIONED_NAME".jar
     - echo Artifact successfully removed from S3 bucket "$ARTIFACTS_BUCKET_NAME"
-  dependencies:
+  needs:
     - upload-jar
-  artifacts:
-    paths:
-      - ./upload.env
   only:
     - main
   when: manual

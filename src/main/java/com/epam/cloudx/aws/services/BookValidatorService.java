@@ -2,13 +2,12 @@ package com.epam.cloudx.aws.services;
 
 import com.epam.cloudx.aws.domain.Book;
 import com.epam.cloudx.aws.exceptions.BookValidationException;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
 
 /**
  * Validates requests of the Book API. This may be

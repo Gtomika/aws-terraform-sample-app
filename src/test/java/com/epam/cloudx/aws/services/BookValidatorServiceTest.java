@@ -1,13 +1,12 @@
 package com.epam.cloudx.aws.services;
 
-import com.epam.cloudx.aws.domain.Book;
-import com.epam.cloudx.aws.exceptions.BookValidationException;
-import com.epam.cloudx.aws.services.BookValidatorService;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-
 import static com.epam.cloudx.aws.utils.BookTestUtils.testBook;
 import static org.junit.jupiter.api.Assertions.*;
+
+import com.epam.cloudx.aws.domain.Book;
+import com.epam.cloudx.aws.exceptions.BookValidationException;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 class BookValidatorServiceTest {
 

@@ -1,5 +1,7 @@
 package com.epam.cloudx.aws.mappers;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import com.epam.cloudx.aws.controllers.dto.BookRequest;
 import com.epam.cloudx.aws.controllers.dto.BookResponse;
 import com.epam.cloudx.aws.domain.Book;
@@ -12,8 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = MapperTestConfig.class)

@@ -1,8 +1,7 @@
 package com.epam.cloudx.aws.exceptions;
 
-import org.springframework.http.HttpStatus;
-
 import java.util.List;
+import org.springframework.http.HttpStatus;
 
 public class BookValidationException extends BookApiException {
 

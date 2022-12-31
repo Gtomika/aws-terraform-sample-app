@@ -1,17 +1,16 @@
 package com.epam.cloudx.aws;
 
-import org.junit.jupiter.api.BeforeAll;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
-import org.testcontainers.containers.localstack.LocalStackContainer;
-
-import java.io.IOException;
-import java.time.Duration;
-
 import static org.testcontainers.containers.localstack.LocalStackContainer.Service.DYNAMODB;
 import static org.testcontainers.containers.localstack.LocalStackContainer.Service.S3;
 import static org.testcontainers.utility.DockerImageName.parse;
 import static org.testcontainers.utility.ImageNameSubstitutor.instance;
+
+import java.io.IOException;
+import java.time.Duration;
+import org.junit.jupiter.api.BeforeAll;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
+import org.testcontainers.containers.localstack.LocalStackContainer;
 
 
 /**
@@ -63,9 +62,8 @@ public class IntegrationTestInitializer {
     @DynamicPropertySource
     public static void props(DynamicPropertyRegistry registry) {
         int localstackExposedPort = localStackContainer.getFirstMappedPort();
-        String s3 = localStackContainer.getEndpointOverride(S3).toString();
-        String db = localStackContainer.getEndpointOverride(DYNAMODB).toString();
 
+        registry.add("server.port", () -> 8080);
         registry.add("infrastructure.aws-region", () -> localStackContainer.getRegion());
         registry.add("infrastructure.s3-localstack-endpoint", () -> localStackContainer.getEndpointOverride(S3));
         registry.add("infrastructure.dynamodb-localstack-endpoint", () -> localStackContainer.getEndpointOverride(DYNAMODB));

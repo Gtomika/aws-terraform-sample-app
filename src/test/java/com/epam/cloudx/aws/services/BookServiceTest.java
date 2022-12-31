@@ -1,10 +1,22 @@
 package com.epam.cloudx.aws.services;
 
+import static com.epam.cloudx.aws.utils.BookTestUtils.TEST_ISBN;
+import static com.epam.cloudx.aws.utils.BookTestUtils.testBook;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.when;
+
 import com.epam.cloudx.aws.domain.Book;
 import com.epam.cloudx.aws.exceptions.BookDuplicationException;
 import com.epam.cloudx.aws.exceptions.BookImageInvalidException;
 import com.epam.cloudx.aws.exceptions.BookNotFoundException;
 import com.epam.cloudx.aws.repositories.BookRepository;
+import java.nio.file.Path;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -12,18 +24,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.nio.file.Path;
-
-import static com.epam.cloudx.aws.utils.BookTestUtils.TEST_ISBN;
-import static com.epam.cloudx.aws.utils.BookTestUtils.testBook;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class BookServiceTest {
@@ -96,7 +96,7 @@ class BookServiceTest {
         expectedBookWithImagePath.setImagePath(expectedBook.getIsbn() + ".png");
 
         when(bookRepository.getBook(expectedBook.getIsbn())).thenReturn(expectedBook);
-        when(bookImagesService.uploadImage(anyString(), any(Path.class), anyString()))
+        when(bookImagesService.uploadImage(anyString(), any(Path.class), anyString(), anyLong()))
                 .thenReturn(expectedBook.getIsbn() + ".png");
         when(bookRepository.createOrUpdateBook(expectedBookWithImagePath)).thenReturn(expectedBookWithImagePath);
 

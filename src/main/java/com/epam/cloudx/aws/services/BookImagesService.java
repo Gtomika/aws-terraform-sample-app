@@ -2,6 +2,7 @@ package com.epam.cloudx.aws.services;
 
 import com.epam.cloudx.aws.exceptions.BookApiException;
 import com.epam.cloudx.aws.exceptions.BookImageInvalidException;
+import java.nio.file.Path;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -12,8 +13,6 @@ import software.amazon.awssdk.core.exception.SdkException;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
-
-import java.nio.file.Path;
 
 /**
  * Manages the book cover images which are stored in an S3 bucket.
