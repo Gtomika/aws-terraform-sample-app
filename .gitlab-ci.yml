@@ -70,8 +70,10 @@ delete-jar: # cleanup job -> delete JAR from artifacts bucket
     - aws s3 rm s3://"$ARTIFACTS_BUCKET_NAME"/"$ARTIFACT_VERSIONED_NAME".jar
     - echo Artifact successfully removed from S3 bucket "$ARTIFACTS_BUCKET_NAME"
   dependencies:
-    - build-jar
     - upload-jar
+  artifacts:
+    paths:
+      - ./upload.env
   only:
     - main
   when: manual
@@ -79,6 +81,7 @@ delete-jar: # cleanup job -> delete JAR from artifacts bucket
 
 spotless-check:
   stage: test
+  image: $GRADLE_IMAGE
   script:
     - export GRADLE_USER_HOME=`pwd`/.gradle
     - chmod +x gradlew
@@ -90,6 +93,7 @@ spotless-check:
 
 unit-test:
   stage: test
+  image: $GRADLE_IMAGE
   script:
     - export GRADLE_USER_HOME=`pwd`/.gradle
     - chmod +x gradlew
@@ -104,6 +108,7 @@ unit-test:
 
 integration-test:
   stage: test
+  image: $GRADLE_IMAGE
   script:
     - export GRADLE_USER_HOME=`pwd`/.gradle
     - chmod +x gradlew
