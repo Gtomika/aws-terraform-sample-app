@@ -136,8 +136,8 @@ terraform-plan:
       -var aws_access_key="$TERRAFORM_AWS_ACCESS_KEY" 
       -var aws_secret_key="$TERRAFORM_AWS_SECRET_KEY" 
       -var aws_account_id="$AWS_ACCOUNT_ID" 
-      -var "artifacts_bucket_name="$ARTIFACTS_BUCKET_NAME" 
-      -var "application_artifact_name="$ARTIFACT_VERSIONED_NAME"
+      -var artifacts_bucket_name="$ARTIFACTS_BUCKET_NAME" 
+      -var application_artifact_name="$ARTIFACT_VERSIONED_NAME"
     - echo Plan complete, review carefully!
   artifacts:
     paths:
