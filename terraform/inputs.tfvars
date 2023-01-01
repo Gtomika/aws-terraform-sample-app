@@ -1,6 +1,5 @@
 # Sensitive data such as AWS credentials are
-# not here but in 'secrets.tfvars' which is not
-# checked into git, but uploaded to GitLab as project variable.
+# not here but GitLab projects secrets.
 
 # AWS
 aws_region = "eu-central-1"

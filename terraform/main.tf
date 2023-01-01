@@ -41,6 +41,8 @@ module "ec2" {
     vpc_id = module.vpc.vpc_id
     subnet_id = module.vpc.subnet_id
     images_bucket_arn = module.s3.bucket_arn
+    images_bucket_name = module.s3.bucket_name
     artifacts_bucket_name = var.artifacts_bucket_name
-    table_arn = module.dynamodb.table_arn
+    data_table_arn = module.dynamodb.table_arn
+    data_table_name = module.dynamodb.table_name
 }

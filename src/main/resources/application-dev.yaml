@@ -2,12 +2,8 @@ server:
   port: 8080
 
 spring:
-  profiles:
-    active:
-      - dev
   jackson:
     default-property-inclusion: non_null
-
 
 infrastructure:
   aws-region: eu-central-1
@@ -27,3 +23,5 @@ book-api:
 logging:
   level:
     com.epam.cloudx.aws: DEBUG
+  file:
+    path: .

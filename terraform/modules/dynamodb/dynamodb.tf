@@ -10,4 +10,8 @@ resource "aws_dynamodb_table" "dynamodb_table" {
     name = var.hash_key_name
     type = "S"
   }
+  point_in_time_recovery {
+    enabled = false
+  }
+  stream_enabled = false
 }

@@ -70,11 +70,6 @@ variable "artifacts_bucket_name" {
   description = "Name of S3 bucket in which packages JARs of the app are stored. Used in instance init script"
 }
 
-variable "terraform_state_bucket_name" {
-  type = string
-  description = "Name of the S3 bucket where terraform state file is stored"
-}
-
 variable "book_data_table_name" {
   type = string
   description = "DynamoDB table name of book data table"

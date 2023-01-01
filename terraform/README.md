@@ -12,15 +12,17 @@ The IaC consists of the root module and submodules, located in the
 
 The following inputs are required to make this configuration work:
 
- - ``inputs.auto.tfvars``: Provides the not sensitive info, will be picked 
-up by Terraform automatically.
- - ``secrets.tfvars``: Provides the sensitive info such as AWS access keys. 
-Not checked into Git, but provided to the pipeline as GitLab project variable.
+ - ``inputs.tfvars``: Provides the not sensitive info.
  - ``environment``: Application environment. For simplicity's sake only ``prod`` 
 is used for now.
+ - ``aws_access_key``: Access key of Terraform user.
+ - ``aws_secret_key``: Secret key of Terraform user.
+ - ``aws_account_id``: 8 digit AWS account ID.
  - ``artifacts_bucket_name``: Name of S3 bucket where application artifact is.
  - ``application_artifact_name``: This is the key of the packages app JAR in the artifacts 
 bucket. There is a pipeline job which uploads the artifact to S3 before terraform runs. 
+
+Additionally, the ``backend.hcl`` file also must be provided.
 
 ## Terraform user and permissions
 

@@ -38,11 +38,19 @@ variable "images_bucket_arn" {
   type = string
 }
 
+variable "images_bucket_name" {
+  type = string
+}
+
 variable "artifacts_bucket_name" {
   type = string
 }
 
-variable "table_arn" {
+variable "data_table_arn" {
+  type = string
+}
+
+variable "data_table_name" {
   type = string
 }
 

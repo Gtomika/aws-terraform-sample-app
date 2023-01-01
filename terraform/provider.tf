@@ -6,11 +6,8 @@ terraform {
     }
   }
   # Using S3 bucket to store terraform state
-  backend "s3" { # variables not allowed here :(
-    bucket = "tamas-gaspar-epam-cloudx-terraform-state"
-    key = "EpamCloudxAwsApp"
-    region = "eu-central-1"
-  }
+  # set in 'backend.hcl'
+  backend "s3" {}
 }
 
 provider "aws" {

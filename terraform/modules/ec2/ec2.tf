@@ -10,6 +10,7 @@ resource "aws_security_group_rule" "allow_all_outbound" {
   protocol          = "all"
   from_port         = 0
   to_port           = 65535
+  cidr_blocks       = ["0.0.0.0/0"]
   security_group_id = aws_security_group.app_security_group.id
   description = "Allow all outbound traffic from the instance"
 }
@@ -20,16 +21,17 @@ resource "aws_security_group_rule" "allow_http_inbound_on_app_port" {
   protocol          = "tcp"
   from_port         = var.application_port
   to_port           = var.application_port
+  cidr_blocks       = ["0.0.0.0/0"]
   security_group_id = aws_security_group.app_security_group.id
   description = "Allow all HTTP traffic on the app port, ${var.application_port}"
 }
 
-# TODO restrict to my IP only?
 resource "aws_security_group_rule" "allow_ssh" {
   type              = "ingress"
   protocol          = "tcp"
   from_port         = 22
   to_port           = 22
+  cidr_blocks       = ["0.0.0.0/0"] # TODO restrict to my IP only?
   security_group_id = aws_security_group.app_security_group.id
   description = "Allow SSH connection"
 }
@@ -52,7 +54,7 @@ data aws_iam_policy_document "iam_instance_policy_data" {
   statement { # Access to the book data DynamoDB table items
     sid = "FullAccessToTableItems"
     effect = "Allow"
-    resources = [ var.table_arn ]
+    resources = [ var.data_table_arn ]
     actions = [
       "dynamodb:DescribeTable",
       "dynamodb:Query",
@@ -63,8 +65,14 @@ data aws_iam_policy_document "iam_instance_policy_data" {
   statement { # to be able to download app JAR
     sid = "AllowGetFromArtifactsBucket"
     effect = "Allow"
-    resources = [ "arn:aws:s3:::${var.artifacts_bucket_name}" ]
-    actions = [ "s3:GetObject" ]
+    resources = [
+      "arn:aws:s3:::${var.artifacts_bucket_name}",
+      "arn:aws:s3:::${var.artifacts_bucket_name}/*"
+    ]
+    actions = [
+      "s3:ListBucket",
+      "s3:GetObject"
+    ]
   }
 }
 
@@ -106,7 +114,7 @@ resource "aws_iam_instance_profile" "iam_instance_profile" {
 # Create key pair which can be used to SSH to instance
 
 resource "tls_private_key" "private_key" {
-  algorithm = "rsa"
+  algorithm = "RSA"
   rsa_bits = 4096
 }
 
@@ -118,7 +126,7 @@ resource "aws_key_pair" "instance_key_pair" {
 
 # private key is written to file so that it can be added to GitLab artifact outputs
 resource "local_sensitive_file" "instance_private_key_file" {
-  filename = "ssh_keys/sample-app-private-key-rsa"
+  filename = "${path.root}/ssh_keys/sample-app-private-key-rsa"
   content = tls_private_key.private_key.private_key_pem
 }
 
@@ -137,7 +145,9 @@ resource "aws_eip" "elastic_ip" {
 }
 
 resource "aws_instance" "instance" {
-  name = "${var.application_name}-${var.aws_availability_zone}-${var.environment}"
+  tags = {
+    Name = "${var.application_name}-${var.aws_availability_zone}-${var.environment}"
+  }
   availability_zone = var.aws_availability_zone
   ami = var.ami_id
   instance_type = var.instance_type
@@ -157,7 +167,13 @@ resource "aws_instance" "instance" {
   mkdir -p server
   cd server
   aws s3 cp s3://${var.artifacts_bucket_name}/${var.application_artifact_name} ${var.application_artifact_name}
-  java -Dspring.profiles.active=${var.environment} -jar ${var.application_artifact_name}
+  export APP_ENVIRONMENT="${var.environment}"
+  export APP_PORT="${var.application_port}"
+  export APP_AWS_REGION="${var.aws_region}"
+  export APP_AWS_DYNAMODB_BOOK_DATA_TABLE_NAME="${var.data_table_name}"
+  export APP_AWS_S3_BOOK_IMAGES_BUCKET_URL="https://${var.images_bucket_name}.s3.${var.aws_region}.amazonaws.com"
+  export APP_AWS_S3_BOOK_IMAGES_BUCKET_NAME="${var.images_bucket_name}"
+  java -jar ${var.application_artifact_name}
   EOF
   user_data_replace_on_change = true # Any change in user_data will recreate instance
 }

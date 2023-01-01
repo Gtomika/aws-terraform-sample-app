@@ -13,5 +13,18 @@ GitLab CI/CD pipeline.
 
 See the README-s in the folders for more information.
 
+## Possible improvements
+
+A list of improvements that I'm aware of, but had no time yet to implement 
+them:
+
+ - Provision load balancer and auto-scaling group instead of just 
+plain EC2 instance.
+ - Use VPC endpoints to reach S3 and DynamoDB instead of connecting
+through the public internet.
+ - Set up staging environment, only having ``prod`` is not good practice.
+ - Configure logging to send logs to some observability platform (find free 
+alternative). Right now it is logging to local file and console.
+
 
 

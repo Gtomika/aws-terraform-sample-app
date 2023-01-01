@@ -4,23 +4,25 @@ server:
 spring:
   profiles:
     active:
-      - ${ENVIRONMENT}
+      - ${APP_ENVIRONMENT}
   jackson:
     default-property-inclusion: non_null
 
-
 infrastructure:
-  aws-region: ${AWS_REGION}
+  aws-region: ${APP_AWS_REGION}
   book-data-table:
-    name: ${AWS_DYNAMODB_BOOK_DATA_TABLE_NAME}
+    name: ${APP_AWS_DYNAMODB_BOOK_DATA_TABLE_NAME}
   book-images-bucket:
-    url: ${AWS_S3_BOOK_IMAGES_BUCKET_URL}
-    name: ${AWS_S3_BOOK_IMAGES_BUCKET_NAME}
+    url: ${APP_AWS_S3_BOOK_IMAGES_BUCKET_URL}
+    name: ${APP_AWS_S3_BOOK_IMAGES_BUCKET_NAME}
 
 book-api:
   validation:
-    min-published-year: 1800
+    min-published-year: 1800 # TODO probably should be variable
+
 logging:
   level:
     com.epam.cloudx.aws: ${LOG_LEVEL:INFO}
+  file:
+    path: . # TODO should use observability platform and not log to file
 

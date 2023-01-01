@@ -1,5 +1,4 @@
-# Sensitive variables
-secrets.tfvars
+tfplan
 
 # Local .terraform directories
 **/.terraform/*

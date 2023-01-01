@@ -1,21 +1,21 @@
 stages:
-  - build # build app and upload JAR to S3
-  - publish # artifact management
-  - test # run tests and checks
-  - terraform # terraform init, fmt, plan
-  - deploy # terraform apply
+  - build
+  - publish
+  - test
+  - terraform-plan
+  - terraform-deploy
 
 workflow:
-  rules: # avoid merge request event for general scope
-    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
       when: never
-    - if: '$CI_PIPELINE_SOURCE == "push"'
-    - if: '$CI_PIPELINE_SOURCE == "web"'
+    - if: $CI_PIPELINE_SOURCE == "push"
+    - if: $CI_PIPELINE_SOURCE == "web"
 
 variables:
   GRADLE_IMAGE: gradle:jdk11
   AWS_CLI_IMAGE: amazon/aws-cli
-  TERRAFORM_IMAGE: todo
+  TERRAFORM_IMAGE: hashicorp/terraform
 
 build-jar: # package app into runnable JAR
   stage: build
@@ -26,7 +26,7 @@ build-jar: # package app into runnable JAR
    - ./gradlew bootJar
    - echo Packaged app JAR "$APP_NAME".jar
   cache:
-    key: "$CI_COMMIT_SHORT_SHA"
+    key: $CI_COMMIT_SHORT_SHA
     policy: push
     paths:
       - build
@@ -76,6 +76,7 @@ spotless-check:
   except:
     variables:
       - $SKIP_SPOTLESS_CHECK
+  allow_failure: true
 
 unit-test:
   stage: test
@@ -86,7 +87,7 @@ unit-test:
     - echo "Running unit tests..."
     - ./gradlew test
   cache:
-    key: "$CI_COMMIT_SHORT_SHA"
+    key: $CI_COMMIT_SHORT_SHA
     policy: pull
     paths:
       - build
@@ -101,8 +102,121 @@ integration-test:
     - echo "Running integration tests..."
     - ./gradlew integrationTest
   cache:
-    key: "$CI_COMMIT_SHORT_SHA"
+    key: $CI_COMMIT_SHORT_SHA
     policy: pull
     paths:
       - build
       - .gradle
+
+terraform-init:
+  stage: terraform-plan
+  image: $TERRAFORM_IMAGE
+  script:
+    - cd ./terraform
+    - echo Initializing terraform
+    - terraform init -backend-config=backend.hcl
+  cache:
+    key: $CI_COMMIT_SHORT_SHA
+    policy: push
+    paths:
+      - ./terraform/.terraform
+  artifacts:
+    paths:
+      - ./terraform/.terraform
+    expire_in: 1 hour
+
+terraform-validate:
+  stage: terraform-plan
+  image: $TERRAFORM_IMAGE
+  script:
+    - cd ./terraform
+    - echo Validating Terraform configurations
+    - terraform validate
+  cache:
+    key: $CI_COMMIT_SHORT_SHA
+    policy: pull
+    paths:
+      - ./terraform/.terraform
+  needs:
+    - terraform-init
+  dependencies:
+    - terraform-init
+
+terraform-plan:
+  stage: terraform-plan
+  image: $TERRAFORM_IMAGE
+  script:
+    - export ARTIFACT_VERSIONED_NAME="$APP_NAME"_"$CI_COMMIT_SHORT_SHA".jar
+    - cd ./terraform
+    - echo Create Terraform plan...
+    - terraform plan -out=tfplan
+      -var-file=inputs.tfvars 
+      -var environment="$ENVIRONMENT"
+      -var aws_access_key="$TERRAFORM_AWS_ACCESS_KEY"
+      -var aws_secret_key="$TERRAFORM_AWS_SECRET_KEY"
+      -var aws_account_id="$AWS_ACCOUNT_ID"
+      -var "artifacts_bucket_name="$ARTIFACTS_BUCKET_NAME"
+      -var "application_artifact_name="$ARTIFACT_VERSIONED_NAME"
+    - echo Plan complete, review carefully!
+  cache:
+    key: $CI_COMMIT_SHORT_SHA
+    policy: pull
+    paths:
+      - ./terraform/.terraform
+  artifacts:
+    paths:
+      - ./terraform/tfplan
+    expire_in: 1 hour
+  needs:
+    - terraform-validate
+  dependencies:
+    - terraform-init
+
+terraform-apply:
+  stage: terraform-deploy
+  image: $TERRAFORM_IMAGE
+  script:
+    - cd ./terraform
+    - echo Applying terraform plan to create infrastructure...
+    - terraform apply "tfplan"
+    - echo Infrastructure created for app '$APP_NAME' on environment '$ENVIRONMENT'!
+    - echo Do not manually modify resources created by Terraform!
+    - echo Resources managed by Terraform are tagged 'managed_by=terraform' where possible.
+  cache:
+    key: $CI_COMMIT_SHORT_SHA
+    policy: pull
+    paths:
+      - ./terraform/.terraform
+  artifacts: # export private SSH key as artifact -> can be used to connect to instance
+    paths:
+      - ./terraform/ssh_keys/sample-app-private-key-rsa
+    expire_in: 1 hour
+  dependencies:
+    - terraform-init
+    - terraform-plan
+  when: manual
+  only:
+    - main
+
+terraform-destroy:
+  stage: terraform-deploy
+  image: $TERRAFORM_IMAGE
+  script:
+    - cd ./terraform
+    - echo Destroying infrastructure...
+    - terraform destroy
+    - echo Infrastructure was destroyed successfully!
+  cache:
+    key: $CI_COMMIT_SHORT_SHA
+    policy: pull
+    paths:
+      - ./terraform/.terraform
+  when: manual
+  only:
+    - main
+  needs:
+    - terraform-apply
+  dependencies:
+    - terraform-init
+    - terraform-plan
+

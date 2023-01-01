@@ -1,12 +1,12 @@
 # Provision the book images S3 bucket
 
-resource "aws_s3_bucket" "bucket" {
-  name = "${var.bucket_name}-${var.aws_region}-${var.environment}"
+resource "aws_s3_bucket" "images_bucket" {
+  bucket = "${var.bucket_name}-${var.aws_region}-${var.environment}"
   force_destroy = true # to be able to delete the bucket even with objects in it
 }
 
 resource "aws_s3_bucket_versioning" "bucket_versioning" {
-  bucket = aws_s3_bucket.bucket.id
+  bucket = aws_s3_bucket.images_bucket.id
   versioning_configuration {
     status = "Disabled"
   }
@@ -24,7 +24,7 @@ data "aws_iam_policy_document" "bucket_policy" {
       "s3:List*"
     ]
     resources = [
-      aws_s3_bucket.bucket.arn
+      aws_s3_bucket.images_bucket.arn
     ]
     condition {
       test     = "StringNotEquals"
@@ -45,14 +45,14 @@ data "aws_iam_policy_document" "bucket_policy" {
       "s3:GetObject"
     ]
     resources = [
-      "${aws_s3_bucket.bucket.arn}/*"
+      "${aws_s3_bucket.images_bucket.arn}/*"
     ]
   }
   # Iam role is created in 'ec2' module. This role will allow Ec2 instance to access this bucket
 }
 
 resource "aws_s3_bucket_policy" "bucket_policy_attachment" {
-  bucket = aws_s3_bucket.bucket.id
+  bucket = aws_s3_bucket.images_bucket.id
   policy = data.aws_iam_policy_document.bucket_policy.json
 }
 
