@@ -84,7 +84,12 @@ data aws_iam_policy_document "iam_instance_assume_role_policy_data" {
   statement {
     sid = "AllowAssumeRoleForEc2"
     effect = "Allow"
+    resources = [ "*" ]
     actions = [ "sts:AssumeRole" ]
+    principals {
+      identifiers = ["Service"]
+      type        = "ec2.amazonaws.com"
+    }
   }
 }
 
@@ -117,7 +122,7 @@ resource "tls_private_key" "private_key" {
 # public key will be uploaded with instance
 resource "aws_key_pair" "instance_key_pair" {
   key_name = "Key-${var.application_name}-${var.aws_availability_zone}-${var.environment}"
-  public_key = tls_private_key.private_key.public_key_pem
+  public_key = tls_private_key.private_key.public_key_openssh
 }
 
 # private key is written to file so that it can be added to GitLab artifact outputs

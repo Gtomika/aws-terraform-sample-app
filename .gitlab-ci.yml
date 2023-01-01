@@ -185,7 +185,6 @@ terraform-destroy:
     - main
   needs:
     - terraform-plan
-    - terraform-apply
   dependencies:
     - terraform-plan
   allow_failure: false
