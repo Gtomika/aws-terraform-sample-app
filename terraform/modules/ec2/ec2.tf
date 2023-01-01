@@ -84,10 +84,6 @@ data aws_iam_policy_document "iam_instance_assume_role_policy_data" {
   statement {
     sid = "AllowAssumeRoleForEc2"
     effect = "Allow"
-    principals {
-      type        = "Service"
-      identifiers = ["ec2.amazonaws.com"]
-    }
     actions = [ "sts:AssumeRole" ]
   }
 }

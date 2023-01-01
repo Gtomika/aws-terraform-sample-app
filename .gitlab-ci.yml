@@ -164,13 +164,21 @@ terraform-apply:
   when: manual
   only:
     - main
+  allow_failure: false
 
 terraform-destroy:
   stage: terraform-deploy
   extends: .terraform-job-template
   script:
     - echo Destroying infrastructure...
-    - terraform destroy
+    - terraform destroy 
+      -var-file=inputs.tfvars 
+      -var environment="$ENVIRONMENT" 
+      -var aws_access_key="$TERRAFORM_AWS_ACCESS_KEY" 
+      -var aws_secret_key="$TERRAFORM_AWS_SECRET_KEY" 
+      -var aws_account_id="$AWS_ACCOUNT_ID" 
+      -var artifacts_bucket_name="$ARTIFACTS_BUCKET_NAME" 
+      -var application_artifact_name="$ARTIFACT_VERSIONED_NAME"
     - echo Infrastructure was destroyed successfully!
   when: manual
   only:
@@ -180,4 +188,5 @@ terraform-destroy:
     - terraform-apply
   dependencies:
     - terraform-plan
+  allow_failure: false
 
