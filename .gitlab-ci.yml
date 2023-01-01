@@ -17,12 +17,27 @@ variables:
   AWS_CLI_IMAGE: amazon/aws-cli
   TERRAFORM_IMAGE: hashicorp/terraform
 
+.gradle-job-template:
+  image: $GRADLE_IMAGE
+  before_script:
+    - export GRADLE_USER_HOME=`pwd`/.gradle
+    - chmod +x gradlew
+
+.terraform-job-template:
+  image: $TERRAFORM_IMAGE
+  before_script:
+    - cd ./terraform
+    - echo Initializing terraform
+    - terraform init
+      -backend-config=backend.hcl
+      -backend-config="region=$AWS_DEFAULT_REGION"
+      -backend-config="access_key=$TERRAFORM_AWS_ACCESS_KEY"
+      -backend-config="secret_key=$TERRAFORM_AWS_SECRET_KEY"
+
 build-jar: # package app into runnable JAR
   stage: build
-  image: $GRADLE_IMAGE
+  extends: .gradle-job-template
   script:
-   - export GRADLE_USER_HOME=`pwd`/.gradle
-   - chmod +x gradlew
    - ./gradlew bootJar
    - echo Packaged app JAR "$APP_NAME".jar
   cache:
@@ -67,10 +82,8 @@ delete-jar: # cleanup job -> delete JAR from artifacts bucket
 
 spotless-check:
   stage: test
-  image: $GRADLE_IMAGE
+  extends: .gradle-job-template
   script:
-    - export GRADLE_USER_HOME=`pwd`/.gradle
-    - chmod +x gradlew
     - echo "Performing spotless check..."
     - ./gradlew spotlessCheck
   except:
@@ -80,10 +93,8 @@ spotless-check:
 
 unit-test:
   stage: test
-  image: $GRADLE_IMAGE
+  extends: .gradle-job-template
   script:
-    - export GRADLE_USER_HOME=`pwd`/.gradle
-    - chmod +x gradlew
     - echo "Running unit tests..."
     - ./gradlew test
   cache:
@@ -95,10 +106,8 @@ unit-test:
 
 integration-test:
   stage: test
-  image: $GRADLE_IMAGE
+  extends: .gradle-job-template
   script:
-    - export GRADLE_USER_HOME=`pwd`/.gradle
-    - chmod +x gradlew
     - echo "Running integration tests..."
     - ./gradlew integrationTest
   cache:
@@ -108,50 +117,18 @@ integration-test:
       - build
       - .gradle
 
-terraform-init:
-  stage: terraform-plan
-  image: $TERRAFORM_IMAGE
-  script:
-    - cd ./terraform
-    - echo Initializing terraform
-    - terraform init 
-      -backend-config=backend.hcl 
-      -backend-config="region=$AWS_DEFAULT_REGION"
-      -backend-config="access_key=$TERRAFORM_AWS_ACCESS_KEY"
-      -backend-config="secret_key=$TERRAFORM_AWS_SECRET_KEY"
-  cache:
-    key: $CI_COMMIT_SHORT_SHA
-    policy: push
-    paths:
-      - ./terraform/.terraform
-  artifacts:
-    paths:
-      - ./terraform/.terraform
-    expire_in: 1 hour
-
 terraform-validate:
   stage: terraform-plan
-  image: $TERRAFORM_IMAGE
+  extends: .terraform-job-template
   script:
-    - cd ./terraform
     - echo Validating Terraform configurations
     - terraform validate
-  cache:
-    key: $CI_COMMIT_SHORT_SHA
-    policy: pull
-    paths:
-      - ./terraform/.terraform
-  needs:
-    - terraform-init
-  dependencies:
-    - terraform-init
 
 terraform-plan:
   stage: terraform-plan
-  image: $TERRAFORM_IMAGE
+  extends: .terraform-job-template
   script:
     - export ARTIFACT_VERSIONED_NAME="$APP_NAME"_"$CI_COMMIT_SHORT_SHA".jar
-    - cd ./terraform
     - echo Create Terraform plan...
     - terraform plan -out=tfplan 
       -var-file=inputs.tfvars 
@@ -162,42 +139,27 @@ terraform-plan:
       -var "artifacts_bucket_name="$ARTIFACTS_BUCKET_NAME" 
       -var "application_artifact_name="$ARTIFACT_VERSIONED_NAME"
     - echo Plan complete, review carefully!
-  cache:
-    key: $CI_COMMIT_SHORT_SHA
-    policy: pull
-    paths:
-      - ./terraform/.terraform
   artifacts:
     paths:
       - ./terraform/tfplan
     expire_in: 1 hour
   needs:
-    - terraform-init
     - terraform-validate
-  dependencies:
-    - terraform-init
 
 terraform-apply:
   stage: terraform-deploy
-  image: $TERRAFORM_IMAGE
+  extends: .terraform-job-template
   script:
-    - cd ./terraform
     - echo Applying terraform plan to create infrastructure...
     - terraform apply "tfplan"
     - echo Infrastructure created for app '$APP_NAME' on environment '$ENVIRONMENT'!
     - echo Do not manually modify resources created by Terraform!
     - echo Resources managed by Terraform are tagged 'managed_by=terraform' where possible.
-  cache:
-    key: $CI_COMMIT_SHORT_SHA
-    policy: pull
-    paths:
-      - ./terraform/.terraform
   artifacts: # export private SSH key as artifact -> can be used to connect to instance
     paths:
       - ./terraform/ssh_keys/sample-app-private-key-rsa
     expire_in: 1 hour
   dependencies:
-    - terraform-init
     - terraform-plan
   when: manual
   only:
@@ -205,25 +167,17 @@ terraform-apply:
 
 terraform-destroy:
   stage: terraform-deploy
-  image: $TERRAFORM_IMAGE
+  extends: .terraform-job-template
   script:
-    - cd ./terraform
     - echo Destroying infrastructure...
     - terraform destroy
     - echo Infrastructure was destroyed successfully!
-  cache:
-    key: $CI_COMMIT_SHORT_SHA
-    policy: pull
-    paths:
-      - ./terraform/.terraform
   when: manual
   only:
     - main
   needs:
-    - terraform-init
     - terraform-plan
     - terraform-apply
   dependencies:
-    - terraform-init
     - terraform-plan
 
