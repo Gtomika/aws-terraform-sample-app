@@ -176,4 +176,5 @@ resource "aws_instance" "instance" {
   java -jar ${var.application_artifact_name}
   EOF
   user_data_replace_on_change = true # Any change in user_data will recreate instance
+  disable_api_termination = false
 }
