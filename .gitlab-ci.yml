@@ -168,6 +168,7 @@ terraform-plan:
       - ./terraform/tfplan
     expire_in: 1 hour
   needs:
+    - terraform-init
     - terraform-validate
   dependencies:
     - terraform-init
@@ -215,6 +216,8 @@ terraform-destroy:
   only:
     - main
   needs:
+    - terraform-init
+    - terraform-plan
     - terraform-apply
   dependencies:
     - terraform-init
