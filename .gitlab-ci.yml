@@ -171,7 +171,7 @@ terraform-destroy:
   extends: .terraform-job-template
   script:
     - echo Destroying infrastructure...
-    - terraform destroy 
+    - terraform destroy -auto-approve 
       -var-file=inputs.tfvars 
       -var environment="$ENVIRONMENT" 
       -var aws_access_key="$TERRAFORM_AWS_ACCESS_KEY" 
