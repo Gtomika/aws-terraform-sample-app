@@ -111,6 +111,10 @@ integration-test:
 terraform-init:
   stage: terraform-plan
   image: $TERRAFORM_IMAGE
+  variables: # the backend config requires AWS access (with user 'terraform')
+    AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION
+    AWS_ACCESS_KEY_ID: $TERRAFORM_AWS_ACCESS_KEY
+    AWS_SECRET_ACCESS_KEY: $TERRAFORM_AWS_SECRET_KEY
   script:
     - cd ./terraform
     - echo Initializing terraform
