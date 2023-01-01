@@ -111,18 +111,14 @@ integration-test:
 terraform-init:
   stage: terraform-plan
   image: $TERRAFORM_IMAGE
-  variables: # the backend config requires AWS access (with user 'terraform')
-    AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION
-    AWS_ACCESS_KEY_ID: $TERRAFORM_AWS_ACCESS_KEY
-    AWS_SECRET_ACCESS_KEY: $TERRAFORM_AWS_SECRET_KEY
-  before_script: # need to override global credentials, those are for the CI/CD runner
-    - AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION
-    - AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
-    - AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
   script:
     - cd ./terraform
     - echo Initializing terraform
-    - terraform init -backend-config=backend.hcl
+    - terraform init 
+      -backend-config=backend.hcl 
+      -backend-config="region=$AWS_DEFAULT_REGION"
+      -backend-config="access_key=$TERRAFORM_AWS_ACCESS_KEY"
+      -backend-config="secret_key=$TERRAFORM_AWS_SECRET_KEY"
   cache:
     key: $CI_COMMIT_SHORT_SHA
     policy: push
@@ -157,13 +153,13 @@ terraform-plan:
     - export ARTIFACT_VERSIONED_NAME="$APP_NAME"_"$CI_COMMIT_SHORT_SHA".jar
     - cd ./terraform
     - echo Create Terraform plan...
-    - terraform plan -out=tfplan
+    - terraform plan -out=tfplan 
       -var-file=inputs.tfvars 
-      -var environment="$ENVIRONMENT"
-      -var aws_access_key="$TERRAFORM_AWS_ACCESS_KEY"
-      -var aws_secret_key="$TERRAFORM_AWS_SECRET_KEY"
-      -var aws_account_id="$AWS_ACCOUNT_ID"
-      -var "artifacts_bucket_name="$ARTIFACTS_BUCKET_NAME"
+      -var environment="$ENVIRONMENT" 
+      -var aws_access_key="$TERRAFORM_AWS_ACCESS_KEY" 
+      -var aws_secret_key="$TERRAFORM_AWS_SECRET_KEY" 
+      -var aws_account_id="$AWS_ACCOUNT_ID" 
+      -var "artifacts_bucket_name="$ARTIFACTS_BUCKET_NAME" 
       -var "application_artifact_name="$ARTIFACT_VERSIONED_NAME"
     - echo Plan complete, review carefully!
   cache:
