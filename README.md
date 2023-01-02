@@ -9,12 +9,30 @@ Simple Book API that uses several AWS components:
  - IAM role and policy with the principle of the least privilege.
 
 All of these resources are provisioned using Terraform, which is applied through the 
-GitLab CI/CD pipeline.
+GitLab CI/CD pipeline. By default, the resources **are in a destroyed state** because 
+it is a waste of money to keep the app running.
 
 See the README-s in the folders for more information:
 
  - Terraform details: [terraform/README.md](terraform/README.md)
  - Local setup: [local/README.md](local/README.md)
+
+## CI/CD
+
+Pipeline is defined in the `.gitlab-ci.yml` file.
+
+![pipeline.png](images/pipeline.png)
+
+The following stages are present:
+
+ - Build: Creates fat JAR of the application.
+ - Publish: Jobs to upload and delete the JAR to/from the artifacts S3 bucket. 
+The EC2 instance will grab it from this bucket later.
+ - Test: Run unit, integration and spotless test.
+ - Terraform-plan: Validate terraform config and create plan to apply it.
+ - Terraform-deploy: Use the plan to create or destroy the infrastructure.
+
+[Example of a passed pipeline](https://git.epam.com/tamas_gaspar2/aws-sample-app/-/pipelines/2626341).
 
 ## Possible improvements
 

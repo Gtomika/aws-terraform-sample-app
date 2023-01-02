@@ -27,7 +27,7 @@ Additionally, the ``backend.hcl`` file also must be provided.
 ## Terraform user and permissions
 
 Terraform scripts are using the credentials of the AWS IAM user ``terraform``. These 
-are in the ``secrets.tfvars`` which is not version controlled.  The Terraform user 
+are provided as GitLab project secrets and are not version controlled. The Terraform user 
 has only the necessary permissions to be able to apply this configuration.
 
 All the IAM policies that Terraform needs are in the ``iam_policies`` directory.

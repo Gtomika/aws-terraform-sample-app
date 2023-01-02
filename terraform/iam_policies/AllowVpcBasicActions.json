@@ -1,0 +1,20 @@
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "AllowVPCBasicActions",
+            "Effect": "Allow",
+            "Resource": "*",
+            "Action": [
+                "ec2:Describe*",
+                "ec2:*Vpc*",
+                "ec2:*Subnet*",
+                "ec2:*RouteTable*",
+                "ec2:*Route*",
+                "ec2:*InternetGateway*",
+                "ec2:*SecurityGroup*",
+                "ec2:*Address*"
+            ]
+        }
+    ]
+}
