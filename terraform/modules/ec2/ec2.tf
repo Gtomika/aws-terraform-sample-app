@@ -86,8 +86,8 @@ data aws_iam_policy_document "iam_instance_assume_role_policy_data" {
     effect = "Allow"
     actions = [ "sts:AssumeRole" ]
     principals {
-      identifiers = ["Service"]
-      type        = "ec2.amazonaws.com"
+      type        = "Service"
+      identifiers = [ "ec2.amazonaws.com" ]
     }
   }
 }
