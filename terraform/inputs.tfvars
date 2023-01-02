@@ -10,7 +10,7 @@ application_name = "EpamCloudxAwsApp"
 application_port = 8080
 
 # EC2
-ec2_ami = "ami-025e244119d592089" # Amazon Linux 2 AMI, 64-bit
+ec2_ami = "ami-0a261c0e5f51090b1" # Amazon Linux 2 AMI, 64-bit (x86)
 ec2_instance_type = "t2.micro"
 
 # S3
