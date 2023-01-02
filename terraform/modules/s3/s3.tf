@@ -20,9 +20,7 @@ data "aws_iam_policy_document" "bucket_policy" {
       identifiers = ["*"]
       type        = "*"
     }
-    not_actions = [
-      "s3:List*"
-    ]
+    actions = [ "s3:DeleteBucket" ]
     resources = [
       aws_s3_bucket.images_bucket.arn
     ]

@@ -1,5 +1,4 @@
 # Provision security group ------------------------------
-
 resource "aws_security_group" "app_security_group" {
   name = "Sg-${var.application_name}-${var.aws_region}-${var.environment}"
   vpc_id = var.vpc_id
@@ -15,7 +14,6 @@ resource "aws_security_group_rule" "allow_all_outbound" {
   description = "Allow all outbound traffic from the instance"
 }
 
-# TODO allow HTTPS too?
 resource "aws_security_group_rule" "allow_http_inbound_on_app_port" {
   type              = "ingress"
   protocol          = "tcp"
@@ -31,13 +29,12 @@ resource "aws_security_group_rule" "allow_ssh" {
   protocol          = "tcp"
   from_port         = 22
   to_port           = 22
-  cidr_blocks       = ["0.0.0.0/0"] # TODO restrict to my IP only?
+  cidr_blocks       = ["${var.my_ip}/32"]
   security_group_id = aws_security_group.app_security_group.id
-  description = "Allow SSH connection"
+  description = "Allow SSH connection from my IP only"
 }
 
 # Create IAM role for instance ------------------------------
-
 data aws_iam_policy_document "iam_instance_policy_data" {
   statement { # Access to the book images S3 bucket objects
     sid = "FullAccessToBucketObjects"
@@ -48,7 +45,7 @@ data aws_iam_policy_document "iam_instance_policy_data" {
     ]
     actions = [
       "s3:ListBucket",
-      "s3:*Object"
+      "s3:*Object*"
     ]
   }
   statement { # Access to the book data DynamoDB table items
@@ -59,7 +56,7 @@ data aws_iam_policy_document "iam_instance_policy_data" {
       "dynamodb:DescribeTable",
       "dynamodb:Query",
       "dynamodb:Scan",
-      "dynamodb:*Item"
+      "dynamodb:*Item*"
     ]
   }
   statement { # to be able to download app JAR
@@ -112,7 +109,6 @@ resource "aws_iam_instance_profile" "iam_instance_profile" {
 }
 
 # Create key pair which can be used to SSH to instance
-
 resource "tls_private_key" "private_key" {
   algorithm = "RSA"
   rsa_bits = 4096
@@ -126,22 +122,16 @@ resource "aws_key_pair" "instance_key_pair" {
 
 # private key is written to file so that it can be added to GitLab artifact outputs
 resource "local_sensitive_file" "instance_private_key_file" {
-  filename = "${path.root}/ssh_keys/sample-app-private-key-rsa"
+  filename = "${path.root}/ssh_keys/sample-app-private-key-rsa.pem"
   content = tls_private_key.private_key.private_key_pem
 }
 
 # Provision Ec2 instance ------------------------------
-
 resource "aws_network_interface" "network_interface" {
   subnet_id = var.subnet_id
   security_groups = [
     aws_security_group.app_security_group.id
   ]
-}
-
-resource "aws_eip" "elastic_ip" {
-  network_interface = aws_network_interface.network_interface.id
-  vpc = true
 }
 
 resource "aws_instance" "instance" {

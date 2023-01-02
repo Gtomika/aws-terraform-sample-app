@@ -57,3 +57,9 @@ variable "data_table_name" {
 variable "application_artifact_name" {
   type = string
 }
+
+variable "my_ip" {
+  type = string
+  description = "My IPv4 address, used to limit SSH to this address"
+  sensitive = true
+}

@@ -79,3 +79,9 @@ variable "book_data_table_key" {
   type = string
   description = "Hash key of the 'book_data_table_name' table"
 }
+
+variable "my_ip" {
+  type = string
+  description = "My IPv4 address, used to limit SSH to this address"
+  sensitive = true
+}

@@ -131,7 +131,8 @@ terraform-plan:
     - export ARTIFACT_VERSIONED_NAME="$APP_NAME"_"$CI_COMMIT_SHORT_SHA".jar
     - echo Create Terraform plan...
     - terraform plan -out=tfplan 
-      -var-file=inputs.tfvars 
+      -var-file=inputs.tfvars
+      -var my_ip="$MY_IP"
       -var environment="$ENVIRONMENT" 
       -var aws_access_key="$TERRAFORM_AWS_ACCESS_KEY" 
       -var aws_secret_key="$TERRAFORM_AWS_SECRET_KEY" 
@@ -152,12 +153,12 @@ terraform-apply:
   script:
     - echo Applying terraform plan to create infrastructure...
     - terraform apply "tfplan"
-    - echo Infrastructure created for app '$APP_NAME' on environment '$ENVIRONMENT'!
+    - echo Infrastructure created for app $APP_NAME on environment $ENVIRONMENT!
     - echo Do not manually modify resources created by Terraform!
     - echo Resources managed by Terraform are tagged 'managed_by=terraform' where possible.
   artifacts: # export private SSH key as artifact -> can be used to connect to instance
     paths:
-      - ./terraform/ssh_keys/sample-app-private-key-rsa
+      - ./terraform/ssh_keys/sample-app-private-key-rsa.pem
     expire_in: 1 hour
   dependencies:
     - terraform-plan
@@ -173,6 +174,7 @@ terraform-destroy:
     - echo Destroying infrastructure...
     - terraform destroy -auto-approve 
       -var-file=inputs.tfvars 
+      -var my_ip="$MY_IP"
       -var environment="$ENVIRONMENT" 
       -var aws_access_key="$TERRAFORM_AWS_ACCESS_KEY" 
       -var aws_secret_key="$TERRAFORM_AWS_SECRET_KEY" 

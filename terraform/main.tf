@@ -45,4 +45,5 @@ module "ec2" {
     artifacts_bucket_name = var.artifacts_bucket_name
     data_table_arn = module.dynamodb.table_arn
     data_table_name = module.dynamodb.table_name
+    my_ip = var.my_ip
 }
