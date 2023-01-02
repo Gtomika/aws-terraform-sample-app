@@ -8,7 +8,7 @@ import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
 
 @Configuration
-@Profile("dev")
+@Profile("prod")
 public class S3Config {
 
     @Value("${infrastructure.aws-region}")
@@ -18,7 +18,6 @@ public class S3Config {
      * The SDK will get the credentials from the EC2 instance metadata.
      */
     @Bean
-    @Profile("prod")
     public S3Client s3Client() {
         return S3Client.builder()
                 .region(Region.of(awsRegion))

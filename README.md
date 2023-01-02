@@ -11,7 +11,10 @@ Simple Book API that uses several AWS components:
 All of these resources are provisioned using Terraform, which is applied through the 
 GitLab CI/CD pipeline.
 
-See the README-s in the folders for more information.
+See the README-s in the folders for more information:
+
+ - Terraform details: [terraform/README.md](terraform/README.md)
+ - Local setup: [local/README.md](local/README.md)
 
 ## Possible improvements
 

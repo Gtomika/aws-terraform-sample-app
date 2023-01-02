@@ -12,7 +12,7 @@ import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 
 @Configuration
-@Profile("dev")
+@Profile("prod")
 public class DynamoDbConfig {
 
     @Value("${infrastructure.aws-region}")
