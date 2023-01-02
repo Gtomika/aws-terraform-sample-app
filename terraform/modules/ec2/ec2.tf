@@ -77,7 +77,7 @@ data aws_iam_policy_document "iam_instance_policy_data" {
 }
 
 resource "aws_iam_policy" "iam_instance_policy" {
-  policy = data.aws_iam_policy_document.iam_instance_assume_role_policy_data.json
+  policy = data.aws_iam_policy_document.iam_instance_policy_data.json
 }
 
 data aws_iam_policy_document "iam_instance_assume_role_policy_data" {
