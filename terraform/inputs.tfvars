@@ -19,3 +19,11 @@ book_images_bucket_name = "tamas-gaspar-epam-cloudx-book-images"
 # DynamoDB
 book_data_table_name = "TamasGasparEpamCloudxBookData"
 book_data_table_key = "isbn"
+
+# Autoscaling group
+asg_min_instances = 1
+asg_max_instances = 2
+asg_desired_capacity = 1
+health_check_path = "/actuator/health"
+scale_up_at_cpu_usage = 70 #%
+scale_down_at_cpu_usage = 30 #%

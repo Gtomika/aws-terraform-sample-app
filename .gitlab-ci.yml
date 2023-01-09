@@ -85,6 +85,7 @@ spotless-check:
   extends: .gradle-job-template
   script:
     - echo "Performing spotless check..."
+    - echo "If this check fails, run ./gradlew spotlessApply and commit + push"
     - ./gradlew spotlessCheck
   except:
     variables:

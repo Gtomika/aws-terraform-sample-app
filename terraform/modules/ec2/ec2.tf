@@ -126,7 +126,7 @@ resource "local_sensitive_file" "instance_private_key_file" {
   content = tls_private_key.private_key.private_key_pem
 }
 
-# Provision Ec2 instance ------------------------------
+# Describe Ec2 instance launch template
 resource "aws_network_interface" "network_interface" {
   subnet_id = var.subnet_id
   security_groups = [
@@ -134,23 +134,33 @@ resource "aws_network_interface" "network_interface" {
   ]
 }
 
-resource "aws_instance" "instance" {
-  tags = {
-    Name = "${var.application_name}-${var.aws_availability_zone}-${var.environment}"
-  }
-  availability_zone = var.aws_availability_zone
-  ami = var.ami_id
+resource "aws_launch_template" "app_launch_template" {
+  name = "Tmp-${var.application_name}-${var.aws_availability_zone}-${var.environment}"
+  description = "Launch template for ${var.application_name} app instances, environment: ${var.environment}"
+
+  image_id = var.ami_id
   instance_type = var.instance_type
+  placement {
+    availability_zone = var.aws_availability_zone
+  }
+
   # subnet + security groups is attached to the network interface
-  network_interface {
+  network_interfaces {
     device_index         = 0
     network_interface_id = aws_network_interface.network_interface.id
+    delete_on_termination = true
+    associate_public_ip_address = true
   }
+
   # pass previously created (public) key
   key_name = aws_key_pair.instance_key_pair.key_name
+
   # to make it work, Terraform user requires "iam:PassRole" permission
-  iam_instance_profile = aws_iam_instance_profile.iam_instance_profile.name
-  user_data = <<-EOF
+  iam_instance_profile {
+     name = aws_iam_instance_profile.iam_instance_profile.name
+  }
+
+  user_data = base64encode(<<EOF
   #!/bin/bash
   sudo apt update -y
   sudo amazon-linux-extras install java-openjdk11 -y
@@ -165,6 +175,13 @@ resource "aws_instance" "instance" {
   export APP_AWS_S3_BOOK_IMAGES_BUCKET_NAME="${var.images_bucket_name}"
   java -jar ${var.application_artifact_name}
   EOF
-  user_data_replace_on_change = true # Any change in user_data will recreate instance
+  )
+
   disable_api_termination = false
+  disable_api_stop = false
+
+  metadata_options {
+    http_endpoint = "enabled"
+    instance_metadata_tags = "enabled"
+  }
 }

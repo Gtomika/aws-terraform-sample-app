@@ -6,13 +6,17 @@ The IaC consists of the root module and submodules, located in the
  - ``vpc``: Defines network resources for the app.
  - ``s3``: Defines S3 bucket and bucket policies to store book images.
  - ``dynamodb``: Defines DynamoDB table to store book data.
- - ``ec2``: Defines the EC2 instance and related configurations.
+ - ``ec2``: Defines the EC2 instance and related configurations. The result will be a launch template.
+ - ``application_load_balancer``: Load balancer with target group and listener configs.
+ - ``auto_scaling_group``: ASG with CloudWatch alarms that trigger the scaling.
+
+I didn't use any pre-written Terraform modules because the goal of this project is to learn the basics.
 
 ## Terraform inputs
 
 The following inputs are required to make this configuration work:
 
- - ``inputs.tfvars``: Provides the not sensitive info.
+ - ``inputs.tfvars``: Provides the not sensitive info in bulk.
  - ``environment``: Application environment. For simplicity's sake only ``prod`` 
 is used for now.
  - ``aws_access_key``: Access key of Terraform user.
@@ -30,7 +34,8 @@ Terraform scripts are using the credentials of the AWS IAM user ``terraform``. T
 are provided as GitLab project secrets and are not version controlled. The Terraform user 
 has only the necessary permissions to be able to apply this configuration.
 
-All the IAM policies that Terraform needs are in the ``iam_policies`` directory.
+All the IAM policies that Terraform needs are in the ``iam_policies`` directory (with sensitive 
+info removed).
 
 ## Terraform state file
 

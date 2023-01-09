@@ -85,3 +85,49 @@ variable "my_ip" {
   description = "My IPv4 address, used to limit SSH to this address"
   sensitive = true
 }
+
+variable "asg_min_instances" {
+  type = number
+  description = "Minimum amount of instances in autoscaling group"
+  validation {
+    condition = var.asg_min_instances >= 0
+    error_message = "Minimum amount must not be negative"
+  }
+}
+
+variable "asg_max_instances" {
+  type = number
+  description = "Maximum amount of instances in autoscaling group"
+  validation {
+    condition = var.asg_max_instances >= 0
+    error_message = "Maximum amount must not be negative"
+  }
+}
+
+variable "asg_desired_capacity" {
+  type = number
+  description = "Amount of desired instances in autoscaling group"
+}
+
+variable "health_check_path" {
+  type = string
+  description = "Path to which the health check HTTP requests should be sent to"
+}
+
+variable "scale_up_at_cpu_usage" {
+  type = number
+  description = "Percentage of CPU usage when autoscaling group should scale up"
+  validation {
+    condition = var.scale_up_at_cpu_usage > 0 && var.scale_up_at_cpu_usage < 100
+    error_message = "Must be 1-99"
+  }
+}
+
+variable "scale_down_at_cpu_usage" {
+  type = number
+  description = "Percentage of CPU usage when autoscaling group should scale down"
+  validation {
+    condition = var.scale_down_at_cpu_usage > 0 && var.scale_down_at_cpu_usage < 100
+    error_message = "Must be 1-99"
+  }
+}

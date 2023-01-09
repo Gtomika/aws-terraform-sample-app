@@ -7,6 +7,9 @@ plugins {
 }
 
 group = 'com.epam.cloudx.aws'
+// TODO this version is not used in the build/deployment process
+// TODO instead the commit ID is used to simplify CI/CD
+// TODO find way to read this value and use it
 version = '1.0'
 sourceCompatibility = JavaVersion.VERSION_11
 
@@ -30,6 +33,7 @@ bootJar { // dont include version in jar file name
 
 ext {
 	awsSdkVersion = '2.19.4'
+	awsLegacySdkVersion = '1.12.376'
 	mapstructVersion = '1.5.3.Final'
 	testcontainersVersion = '1.17.6'
 	apacheCommonsVersion = '3.12.0'
@@ -43,9 +47,10 @@ dependencies {
 
 	//AWS SDK
 	implementation platform('software.amazon.awssdk:bom:' + awsSdkVersion)
-	implementation 'com.amazonaws:aws-java-sdk-core:1.12.372'
+	implementation 'com.amazonaws:aws-java-sdk-core:' + awsLegacySdkVersion
 	implementation 'software.amazon.awssdk:s3'
 	implementation 'software.amazon.awssdk:dynamodb-enhanced'
+	implementation 'software.amazon.awssdk:regions'
 
 	//Others
 	implementation 'org.mapstruct:mapstruct:' + mapstructVersion
@@ -59,7 +64,7 @@ dependencies {
 	//Test
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	//Test containers
-	testImplementation "org.testcontainers:testcontainers:" + testcontainersVersion
+	testImplementation 'org.testcontainers:testcontainers:' + testcontainersVersion
 	testImplementation 'org.testcontainers:junit-jupiter:' + testcontainersVersion
 	testImplementation 'org.testcontainers:localstack:' + testcontainersVersion
 }

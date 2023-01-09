@@ -28,9 +28,9 @@ output "artifacts_bucket_name" {
   description = "Name of S3 bucket where application artifact is. Use CI/CD to manage!"
 }
 
-output "ec2_instance_public_url" {
-  value = module.ec2.instance_public_url
-  description = "EC2 instance of the application can be found at this URL"
+output "load_balancer_public_url" {
+  value = module.application_load_balancer.alb_public_dns
+  description = "Load balancer of the application can be found at this URL"
 }
 
 output "images_bucket_name" {
