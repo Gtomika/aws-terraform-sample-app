@@ -40,5 +40,5 @@ resource "aws_route_table_association" "public_subnets_route_table_association" 
   count = length(var.aws_availability_zones)
 
   route_table_id = aws_route_table.public_subnets_route_table.id
-  subnet_id = element(aws_subnet.public_subnets, count.index)
+  subnet_id = aws_subnet.public_subnets[count.index].id
 }
