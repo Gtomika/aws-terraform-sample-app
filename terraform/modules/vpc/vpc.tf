@@ -18,7 +18,7 @@ resource "aws_subnet" "public_subnets" {
   availability_zone = element(var.aws_availability_zones, count.index)
   map_public_ip_on_launch = true # Instance in this subnet should have a public IP
   tags = {
-    Name = "Sub-${var.application_name}-${var.aws_region}-${var.environment}"
+    Name = "Sub-${var.application_name}-${element(var.aws_availability_zones, count.index)}-${var.environment}"
   }
 }
 

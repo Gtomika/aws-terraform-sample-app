@@ -5,3 +5,4 @@ policies attached:
 
  - AutoScalingFullAccess
  - ElasticLoadBalancingFullAccess
+ - CloudWatchFullAccess
