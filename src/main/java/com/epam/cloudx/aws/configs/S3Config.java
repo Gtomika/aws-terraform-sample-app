@@ -15,7 +15,13 @@ public class S3Config {
     private String awsRegion;
 
     /**
-     * The SDK will get the credentials from the EC2 instance metadata.
+     * <ul>
+     *     <li>The SDK will get the credentials from the EC2 instance metadata.</li>
+     *     <li>
+     *         The route table will direct all calls targeting the S3 public IPs to the S3 gateway endpoint.
+     *         DNS resolution must be enabled in the VPC!
+     *     </li>
+     * </ul>
      */
     @Bean
     public S3Client s3Client() {

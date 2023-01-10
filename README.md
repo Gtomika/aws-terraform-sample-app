@@ -2,12 +2,13 @@
 
 Simple Book API that uses several AWS components:
 
- - EC2 instance(s) to run the app.
+ - VPC, subnets, internet gateway, VPC endpoints, route tables.
  - DynamoDB table to store book data.
  - S3 bucket to store book cover images (included bucket policy).
- - VPN, subnet, internet gateway, security group.
- - IAM role and policy with the principle of the least privilege.
- - Application load balancer and auto-scaling group.
+ - EC2 launch template.
+ - IAM role and policy for the app with the principle of the least privilege.
+ - Application load balancer with public access (forwards to auto-scaling group).
+ - Auto-scaling group (using launch template).
 
 All of these resources are provisioned using Terraform, which is applied through the 
 GitLab CI/CD pipeline. By default, the resources **are in a destroyed state** because 
@@ -44,13 +45,14 @@ them:
 plain EC2 instance.~~ ✔
  - ~~Multi AZ deployment support~~ ✔
  - Add caching solution: AWS ElastiCache
- - Use VPC endpoints to reach S3 and DynamoDB instead of connecting
-through the public internet.
+ - ~~Use VPC endpoints to reach S3 and DynamoDB instead of connecting
+through the public internet.~~ ✔
  - Don't associate public IP address to each EC2 instance. Find way how to be able to SSH 
 into instances like that (bastion host?). **Requires point above to be fixed first!**
  - Set up staging environment, only having ``prod`` is not good practice.
  - Configure logging to send logs to some observability platform (find free 
 alternative). Right now it is logging to local file and console.
+ - Create diagram with application architecture.
 
 
 

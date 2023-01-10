@@ -34,7 +34,7 @@ output "artifacts_bucket_name" {
 }
 
 output "load_balancer_public_url" {
-  value = module.application_load_balancer.alb_public_dns
+  value = "http://${module.application_load_balancer.alb_public_dns}"
   description = "Load balancer of the application can be found at this URL"
 }
 

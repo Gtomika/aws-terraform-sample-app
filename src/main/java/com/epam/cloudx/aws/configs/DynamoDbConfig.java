@@ -21,6 +21,15 @@ public class DynamoDbConfig {
     @Value("${infrastructure.book-data-table.name}")
     private String bookTableName;
 
+    /**
+     * <ul>
+     *     <li>The SDK will get the credentials from the EC2 instance metadata.</li>
+     *     <li>
+     *         The route table will direct all calls targeting the DynamoDB public IPs to the DynamoDB gateway endpoint.
+     *         DNS resolution must be enabled in the VPC!
+     *     </li>
+     * </ul>
+     */
     @Bean
     public DynamoDbEnhancedClient dynamoDbClient() {
         DynamoDbClient dynamoDbClient = DynamoDbClient.builder()
