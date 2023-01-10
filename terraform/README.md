@@ -28,6 +28,8 @@ bucket. There is a pipeline job which uploads the artifact to S3 before terrafor
 
 Additionally, the ``backend.hcl`` file also must be provided.
 
+**Warning** Do not run terraform plan or apply locally, it should be only run by the CI/CD pipeline!
+
 ## Terraform user and permissions
 
 Terraform scripts are using the credentials of the AWS IAM user ``terraform``. These 

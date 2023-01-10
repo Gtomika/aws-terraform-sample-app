@@ -15,7 +15,7 @@ resource "aws_security_group_rule" "allow_all_outbound" {
   description = "Allow all outbound traffic from the load balancer"
 }
 
-resource "aws_security_group_rule" "allow_http_inbound_on_app_port" {
+resource "aws_security_group_rule" "allow_http_inbound" {
   type              = "ingress"
   protocol          = "tcp"
   from_port         = var.http_default_port
@@ -26,7 +26,7 @@ resource "aws_security_group_rule" "allow_http_inbound_on_app_port" {
 }
 
 resource "aws_alb" "app_load_balancer" {
-  name = "Alb-${var.application_name}-${var.aws_region}-${var.environment}"
+  name = "${var.application_name}-${var.environment}"
   load_balancer_type = "application"
 
   security_groups = [aws_security_group.load_balancer_security_group.id]
@@ -39,7 +39,7 @@ resource "aws_alb" "app_load_balancer" {
 # Target group will forward request to EC2 instances on the app port
 # the ASG will add instances into this target group (see module 'auto_scaling_group')
 resource "aws_alb_target_group" "app_alb_target_group" {
-  name = "Tg-${var.application_name}-${var.aws_region}-${var.environment}"
+  name = "${var.application_name}-${var.environment}"
   port     = var.application_port
   protocol = "HTTP"
   target_type = "instance" # will target the EC2 instances in the autoscaling group
