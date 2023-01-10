@@ -11,7 +11,8 @@
                 "ec2:*Tags*",
                 "ec2:*NetworkInterface",
                 "ec2:*KeyPair",
-                "ec2:*InstanceProfile*"
+                "ec2:*InstanceProfile*",
+                "ec2:*LaunchTemplate*"
             ],
             "Condition": {
                 "StringEqualsIfExists": {

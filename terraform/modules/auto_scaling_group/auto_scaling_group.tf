@@ -3,12 +3,15 @@ resource "aws_autoscaling_group" "app_autoscaling_group" {
   min_size = var.asg_min_instances
   max_size = var.asg_max_instances
   desired_capacity = var.asg_desired_capacity
-  availability_zones = [var.aws_availability_zone]
+  # Determines which subnets to launch the instances in
+  vpc_zone_identifier = var.public_subnet_ids
 
   launch_template {
     id = var.app_launch_template_id
     version = "$Latest"
   }
+
+  health_check_type = "ELB"
 
   # Here it is said to attach all instances in this ASG to target group of load balancer
   target_group_arns = [

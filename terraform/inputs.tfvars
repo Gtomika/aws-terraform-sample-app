@@ -3,7 +3,10 @@
 
 # AWS
 aws_region = "eu-central-1"
-aws_availability_zone = "eu-central-1a"
+aws_availability_zones = [
+  "eu-central-1a",
+  "eu-central-1b"
+]
 
 # App
 application_name = "EpamCloudxAwsApp"

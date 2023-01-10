@@ -2,10 +2,6 @@ variable "aws_region" {
   type = string
 }
 
-variable "aws_availability_zone" {
-  type = string
-}
-
 variable "environment" {
   type = string
 }
@@ -41,4 +37,8 @@ variable "scale_up_at_cpu_usage" {
 
 variable "scale_down_at_cpu_usage" {
   type = number
+}
+
+variable "public_subnet_ids" {
+  type = list(string)
 }

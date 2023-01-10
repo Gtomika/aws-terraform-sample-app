@@ -3,9 +3,9 @@ variable "aws_region" {
   description = "AWS region in which the sample app is deployed"
 }
 
-variable "aws_availability_zone" {
-  type = string
-  description = "AWS AZ which must be in the 'aws_region'"
+variable "aws_availability_zones" {
+  type = list(string)
+  description = "AWS AZs in which instances are deployed (all must be in 'aws_region')"
 }
 
 variable "aws_access_key" {

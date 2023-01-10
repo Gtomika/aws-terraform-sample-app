@@ -42,6 +42,7 @@ them:
 
  - ~~Provision load balancer and auto-scaling group instead of just 
 plain EC2 instance.~~ ✔
+ - ~~Multi AZ deployment support~~ ✔
  - Add caching solution: AWS ElastiCache
  - Use VPC endpoints to reach S3 and DynamoDB instead of connecting
 through the public internet.

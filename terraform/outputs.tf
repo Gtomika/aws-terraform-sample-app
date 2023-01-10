@@ -18,6 +18,11 @@ output "aws_region" {
   description = "AWS deployment region"
 }
 
+output "aws_availability_zones" {
+  value = var.aws_availability_zones
+  description = "AWS AZ-s used by the app"
+}
+
 output "application_artifact_name" {
   value = var.application_artifact_name
   description = "Artifact of this deployment, which is in S3 bucket 'artifacts_bucket_name'. Use CI/CD to manage!"
