@@ -19,6 +19,12 @@ See the README-s in the folders for more information:
  - Terraform details: [terraform/README.md](terraform/README.md)
  - Local setup: [local/README.md](local/README.md)
 
+## Application architecture
+
+May contain not yet implemented resources, and some newly added components might be missing.
+
+![archi.png](images/AwsSampleApp.png)
+
 ## CI/CD
 
 Pipeline is defined in the `.gitlab-ci.yml` file.
@@ -34,7 +40,7 @@ The EC2 instance will grab it from this bucket later.
  - Terraform-plan: Validate terraform config and create plan to apply it.
  - Terraform-deploy: Use the plan to create or destroy the infrastructure.
 
-[Example of a passed pipeline](https://git.epam.com/tamas_gaspar2/aws-sample-app/-/pipelines/2626341).
+[Example of a passed pipeline](https://git.epam.com/tamas_gaspar2/aws-sample-app/-/pipelines/2641950).
 
 ## Possible improvements
 
@@ -52,7 +58,7 @@ into instances like that (bastion host?). **Requires point above to be fixed fir
  - Set up staging environment, only having ``prod`` is not good practice.
  - Configure logging to send logs to some observability platform (find free 
 alternative). Right now it is logging to local file and console.
- - Create diagram with application architecture.
+ - ~~Create diagram with application architecture.~~ ✔
 
 
 
