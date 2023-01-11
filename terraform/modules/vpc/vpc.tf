@@ -12,16 +12,28 @@ resource "aws_vpc" "vpc" {
   }
 }
 
-# Define a public subnet for each AZs
+# Define a public and private subnet for each AZs
 resource "aws_subnet" "public_subnets" {
-  count = length(var.aws_availability_zones)
+  count = length(var.public_subnet_cidr_blocks)
 
   vpc_id = aws_vpc.vpc.id
   cidr_block = element(var.public_subnet_cidr_blocks, count.index)
   availability_zone = element(var.aws_availability_zones, count.index)
-  map_public_ip_on_launch = true # Instance in this subnet should have a public IP
+  map_public_ip_on_launch = true # Resources in this subnet should have a public IP
   tags = {
-    Name = "Sub-${var.application_name}-${element(var.aws_availability_zones, count.index)}-${var.environment}"
+    Name = "Pub-${var.application_name}-${element(var.aws_availability_zones, count.index)}-${var.environment}"
+  }
+}
+
+resource "aws_subnet" "private_subnets" {
+  count = length(var.private_subnet_cidr_blocks)
+
+  vpc_id = aws_vpc.vpc.id
+  cidr_block = element(var.private_subnet_cidr_blocks, count.index)
+  availability_zone = element(var.aws_availability_zones, count.index)
+  map_public_ip_on_launch = false
+  tags = {
+    Name = "Prv-${var.application_name}-${element(var.aws_availability_zones, count.index)}-${var.environment}"
   }
 }
 
@@ -40,10 +52,41 @@ resource "aws_route_table" "public_subnets_route_table" {
 }
 
 resource "aws_route_table_association" "public_subnets_route_table_association" {
-  count = length(var.aws_availability_zones)
+  count = length(aws_subnet.public_subnets)
 
   route_table_id = aws_route_table.public_subnets_route_table.id
   subnet_id = aws_subnet.public_subnets[count.index].id
+}
+
+# Route table for the private subnets
+resource "aws_route_table" "private_subnets_route_table" {
+  vpc_id = aws_vpc.vpc.id
+  # 'local' route is created implicitly
+}
+
+resource "aws_route_table_association" "private_subnets_route_table_association" {
+  count = length(aws_subnet.private_subnets)
+
+  route_table_id = aws_route_table.private_subnets_route_table.id
+  subnet_id = aws_subnet.private_subnets[count.index].id
+}
+
+# Internal security group. All instances will get this to be able to
+# connect to each other regardless of protocol/port
+resource "aws_security_group" "internal_security_group" {
+  name = "Int-${var.application_name}-${var.aws_region}-${var.environment}"
+  description = "${var.application_name} internal security group"
+  vpc_id = aws_vpc.vpc.id
+}
+
+resource "aws_security_group_rule" "internal_access_rule" {
+  type              = "ingress"
+  from_port         = 0
+  to_port           = 65535
+  protocol          = "all"
+  security_group_id = aws_security_group.internal_security_group.id
+  source_security_group_id = aws_security_group.internal_security_group.id
+  description = "Allow all traffic from other resources with this security group"
 }
 
 # VPC gateway endpoints for S3 and dynamoDB
@@ -55,6 +98,7 @@ resource "aws_vpc_endpoint" "s3_vpc_endpoint" {
   vpc_endpoint_type = "Gateway"
   route_table_ids = [
     aws_route_table.public_subnets_route_table.id,
+    aws_route_table.private_subnets_route_table.id,
     aws_vpc.vpc.main_route_table_id
   ]
   tags = {
@@ -69,6 +113,7 @@ resource "aws_vpc_endpoint" "dynamodb_vpc_endpoint" {
   vpc_endpoint_type = "Gateway"
   route_table_ids = [
     aws_route_table.public_subnets_route_table.id,
+    aws_route_table.private_subnets_route_table.id,
     aws_vpc.vpc.main_route_table_id
   ]
   tags = {

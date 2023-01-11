@@ -23,7 +23,9 @@ See the README-s in the folders for more information:
 
 May contain not yet implemented resources, and some newly added components might be missing.
 
-![archi.png](images/AwsSampleApp.png)
+![archi.png](images/AwsSampleApp.drawio.png)
+
+Depending on autoscaling group desired capacity, some private subnets may not have any instances.
 
 ## CI/CD
 
@@ -53,7 +55,7 @@ plain EC2 instance.~~ ✔
  - Add caching solution: AWS ElastiCache
  - ~~Use VPC endpoints to reach S3 and DynamoDB instead of connecting
 through the public internet.~~ ✔
- - Don't associate public IP address to each EC2 instance. Find way how to be able to SSH 
+ - Don't associate public IP address to each EC2 instance. Create private subnets. Find way how to be able to SSH 
 into instances like that (bastion host?). **Requires point above to be fixed first!**
  - Set up staging environment, only having ``prod`` is not good practice.
  - Configure logging to send logs to some observability platform (find free 

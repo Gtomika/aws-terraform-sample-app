@@ -29,7 +29,11 @@ resource "aws_alb" "app_load_balancer" {
   name = "${var.application_name}-${var.environment}"
   load_balancer_type = "application"
 
-  security_groups = [aws_security_group.load_balancer_security_group.id]
+  security_groups = [
+    aws_security_group.load_balancer_security_group.id,
+    var.internal_security_group_id
+  ]
+  # the load balancer must be in public subnets
   subnets = var.public_subnet_ids
 
   internal = false
@@ -37,6 +41,10 @@ resource "aws_alb" "app_load_balancer" {
 
   # to work across multiple AZs
   enable_cross_zone_load_balancing = true
+
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
 # Target group will forward request to EC2 instances on the app port

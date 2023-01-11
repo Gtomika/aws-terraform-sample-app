@@ -39,6 +39,6 @@ variable "scale_down_at_cpu_usage" {
   type = number
 }
 
-variable "public_subnet_ids" {
+variable "private_subnet_ids" {
   type = list(string)
 }

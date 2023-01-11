@@ -24,16 +24,6 @@ resource "aws_security_group_rule" "allow_http_inbound_on_app_port" {
   description = "Allow all HTTP traffic on the app port, ${var.application_port}"
 }
 
-resource "aws_security_group_rule" "allow_ssh" {
-  type              = "ingress"
-  protocol          = "tcp"
-  from_port         = 22
-  to_port           = 22
-  cidr_blocks       = ["${var.my_ip}/32"]
-  security_group_id = aws_security_group.app_security_group.id
-  description = "Allow SSH connection from my IP only"
-}
-
 # Create IAM role for instance ------------------------------
 data aws_iam_policy_document "iam_instance_policy_data" {
   statement { # Access to the book images S3 bucket objects
@@ -108,24 +98,6 @@ resource "aws_iam_instance_profile" "iam_instance_profile" {
   role = aws_iam_role.iam_instance_role.name
 }
 
-# Create key pair which can be used to SSH to instance
-resource "tls_private_key" "private_key" {
-  algorithm = "RSA"
-  rsa_bits = 4096
-}
-
-# public key will be uploaded with instance
-resource "aws_key_pair" "instance_key_pair" {
-  key_name = "Key-${var.application_name}-${var.aws_region}-${var.environment}"
-  public_key = tls_private_key.private_key.public_key_openssh
-}
-
-# private key is written to file so that it can be added to GitLab artifact outputs
-resource "local_sensitive_file" "instance_private_key_file" {
-  filename = "${path.root}/ssh_keys/sample-app-private-key-rsa.pem"
-  content = tls_private_key.private_key.private_key_pem
-}
-
 # Describe Ec2 instance launch template
 resource "aws_launch_template" "app_launch_template" {
   name = "Tmp-${var.application_name}-${var.aws_region}-${var.environment}"
@@ -134,15 +106,15 @@ resource "aws_launch_template" "app_launch_template" {
   image_id = var.ami_id
   instance_type = var.instance_type
 
-  # pass previously created (public) key
-  key_name = aws_key_pair.instance_key_pair.key_name
-
   # to make it work, Terraform user requires "iam:PassRole" permission
   iam_instance_profile {
      name = aws_iam_instance_profile.iam_instance_profile.name
   }
 
-  vpc_security_group_ids = [aws_security_group.app_security_group.id]
+  vpc_security_group_ids = [
+    aws_security_group.app_security_group.id,
+    var.internal_security_group_id
+  ]
 
   user_data = base64encode(<<EOF
   #!/bin/bash

@@ -10,8 +10,12 @@ variable "application_name" {
   type = string
 }
 
-variable "application_port" {
-  type = number
+variable "instance_type" {
+  type = string
+}
+
+variable "ami_id" {
+  type = string
 }
 
 variable "vpc_id" {
@@ -22,13 +26,10 @@ variable "public_subnet_ids" {
   type = list(string)
 }
 
-variable "health_check_path" {
+variable "my_ip" {
   type = string
-}
-
-variable "http_default_port" {
-  type = number
-  default = 80
+  description = "My IPv4 address, used to limit SSH to this address"
+  sensitive = true
 }
 
 variable "internal_security_group_id" {

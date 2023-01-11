@@ -27,26 +27,39 @@ module "dynamodb" {
     hash_key_name = var.book_data_table_key
 }
 
-# EC2 launch template (+security group, +IAM policies for it)
-module "ec2" {
-    source = "./modules/ec2"
+# bastion host
+module "bastion_ec2" {
+    source = "./modules/ec2_bastion"
     aws_region = var.aws_region
-    aws_availability_zones = var.aws_availability_zones
     application_name = var.application_name
-    application_port = var.application_port
-    application_artifact_name = var.application_artifact_name
     environment = var.environment
     instance_type = var.ec2_instance_type
     ami_id = var.ec2_ami
     my_ip = var.my_ip
 
     vpc_id = module.vpc.vpc_id
-    public_subnet_ids = module.vpc.public_subnet_ids
+    public_subnet_ids = module.vpc.public_subnet_ids,
+    internal_security_group_id = module.vpc.internal_security_group_id
+}
+
+# app EC2 launch template (+security group, +IAM policies for it)
+module "app_ec2" {
+    source = "./modules/ec2_app"
+    aws_region = var.aws_region
+    application_name = var.application_name
+    application_port = var.application_port
+    application_artifact_name = var.application_artifact_name
+    environment = var.environment
+    instance_type = var.ec2_instance_type
+    ami_id = var.ec2_ami
+
+    vpc_id = module.vpc.vpc_id
     images_bucket_arn = module.s3.bucket_arn
     images_bucket_name = module.s3.bucket_name
     artifacts_bucket_name = var.artifacts_bucket_name
     data_table_arn = module.dynamodb.table_arn
     data_table_name = module.dynamodb.table_name
+    internal_security_group_id = module.vpc.internal_security_group_id
 }
 
 # Set up application load balancer
@@ -60,6 +73,7 @@ module "application_load_balancer" {
 
     vpc_id = module.vpc.vpc_id
     public_subnet_ids = module.vpc.public_subnet_ids
+    internal_security_group_id = module.vpc.internal_security_group_id
 }
 
 # Create auto scaling group
@@ -74,7 +88,7 @@ module "auto_scaling_group" {
     scale_up_at_cpu_usage = var.scale_up_at_cpu_usage
     scale_down_at_cpu_usage = var.scale_down_at_cpu_usage
 
-    app_launch_template_id = module.ec2.app_launch_template_id
+    app_launch_template_id = module.app_ec2.app_launch_template_id
     alb_target_group_arn = module.application_load_balancer.alb_target_group_arn
-    public_subnet_ids = module.vpc.public_subnet_ids
+    private_subnet_ids = module.vpc.private_subnet_ids
 }

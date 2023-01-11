@@ -4,7 +4,7 @@ resource "aws_autoscaling_group" "app_autoscaling_group" {
   max_size = var.asg_max_instances
   desired_capacity = var.asg_desired_capacity
   # Determines which subnets to launch the instances in
-  vpc_zone_identifier = var.public_subnet_ids
+  vpc_zone_identifier = var.private_subnet_ids
 
   launch_template {
     id = var.app_launch_template_id
