@@ -55,8 +55,8 @@ plain EC2 instance.~~ ✔
  - Add caching solution: AWS ElastiCache
  - ~~Use VPC endpoints to reach S3 and DynamoDB instead of connecting
 through the public internet.~~ ✔
- - Don't associate public IP address to each EC2 instance. Create private subnets. Find way how to be able to SSH 
-into instances like that (bastion host?). **Requires point above to be fixed first!**
+ - ~~Don't associate public IP address to each EC2 instance. Create private subnets. Find way how to be able to SSH 
+into instances like that (bastion host?).~~ ✔
  - Set up staging environment, only having ``prod`` is not good practice.
  - Configure logging to send logs to some observability platform (find free 
 alternative). Right now it is logging to local file and console.

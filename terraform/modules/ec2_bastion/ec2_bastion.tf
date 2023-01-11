@@ -49,7 +49,7 @@ resource "local_sensitive_file" "instance_private_key_file" {
 resource "aws_instance" "bastion_instance" {
   instance_type = "t2.nano" # fixed instance type for bastion
   ami = var.ami_id
-  subnet_id = var.public_subnet_ids[0].id
+  subnet_id = var.public_subnet_ids[0]
 
   # pass previously created (public) key
   key_name = aws_key_pair.instance_key_pair.key_name

@@ -33,12 +33,11 @@ module "bastion_ec2" {
     aws_region = var.aws_region
     application_name = var.application_name
     environment = var.environment
-    instance_type = var.ec2_instance_type
     ami_id = var.ec2_ami
     my_ip = var.my_ip
 
     vpc_id = module.vpc.vpc_id
-    public_subnet_ids = module.vpc.public_subnet_ids,
+    public_subnet_ids = module.vpc.public_subnet_ids
     internal_security_group_id = module.vpc.internal_security_group_id
 }
 

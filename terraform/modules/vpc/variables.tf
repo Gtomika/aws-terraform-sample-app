@@ -24,7 +24,7 @@ variable "private_subnet_cidr_blocks" {
   default = [
     "10.0.3.0/24",
     "10.0.4.0/24"
-  ],
+  ]
   description = "CIDR blocks to use for private subnets, Must have same length as 'aws_availability_zones'"
 }
 

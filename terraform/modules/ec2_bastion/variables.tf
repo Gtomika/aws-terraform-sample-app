@@ -10,8 +10,9 @@ variable "application_name" {
   type = string
 }
 
-variable "instance_type" {
+variable "bastion_instance_type" {
   type = string
+  default = "t2.nano"
 }
 
 variable "ami_id" {
