@@ -16,7 +16,10 @@
             ],
             "Condition": {
                 "StringEqualsIfExists": {
-                    "ec2:InstanceType": "t2.*"
+                    "ec2:InstanceType": [
+                        "t2.micro",
+                        "t2.nano"
+                    ]
                 }
             }
         }

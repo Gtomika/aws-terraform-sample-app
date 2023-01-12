@@ -30,7 +30,3 @@ variable "http_default_port" {
   type = number
   default = 80
 }
-
-variable "internal_security_group_id" {
-  type = string
-}

@@ -72,7 +72,6 @@ module "application_load_balancer" {
 
     vpc_id = module.vpc.vpc_id
     public_subnet_ids = module.vpc.public_subnet_ids
-    internal_security_group_id = module.vpc.internal_security_group_id
 }
 
 # Create auto scaling group
