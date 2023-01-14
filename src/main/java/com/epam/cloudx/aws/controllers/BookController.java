@@ -5,6 +5,7 @@ import com.epam.cloudx.aws.controllers.dto.BookResponse;
 import com.epam.cloudx.aws.domain.Book;
 import com.epam.cloudx.aws.mappers.BookMapper;
 import com.epam.cloudx.aws.services.BookService;
+import javax.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -25,13 +26,17 @@ import org.springframework.web.multipart.MultipartFile;
 @RequiredArgsConstructor
 public class BookController {
 
+    public static final String CACHE_HIT_HEADER = "x-book-cache-hit";
+
     private final BookService bookService;
     private final BookMapper bookMapper;
 
     @GetMapping("/{isbn}")
     @ResponseStatus(HttpStatus.OK)
-    public BookResponse getBook(@PathVariable String isbn) {
-        return bookMapper.mapToBookResponse(bookService.getBook(isbn));
+    public BookResponse getBook(@PathVariable String isbn, HttpServletResponse httpResponse) {
+        var bookSearchResponse = bookService.getBook(isbn);
+        httpResponse.addHeader(CACHE_HIT_HEADER, String.valueOf(bookSearchResponse.isCacheHit()));
+        return bookMapper.mapToBookResponse(bookSearchResponse.getData());
     }
 
     @PostMapping

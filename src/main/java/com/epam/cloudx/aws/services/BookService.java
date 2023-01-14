@@ -1,9 +1,11 @@
 package com.epam.cloudx.aws.services;
 
 import com.epam.cloudx.aws.domain.Book;
+import com.epam.cloudx.aws.domain.CachedResponse;
 import com.epam.cloudx.aws.exceptions.BookApiException;
 import com.epam.cloudx.aws.exceptions.BookDuplicationException;
 import com.epam.cloudx.aws.exceptions.BookNotFoundException;
+import com.epam.cloudx.aws.repositories.BookCacheRepository;
 import com.epam.cloudx.aws.repositories.BookRepository;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -22,9 +24,23 @@ public class BookService {
     private final BookRepository bookRepository;
     private final BookValidatorService bookValidatorService;
     private final BookImagesService bookImagesService;
+    private final BookCacheRepository bookCacheRepository;
 
-    public Book getBook(String isbn) {
-        return bookRepository.getBook(isbn);
+    /**
+     * Attempt to get book from the cache first, if that fails
+     * then from the database.
+     */
+    public CachedResponse<Book> getBook(String isbn) {
+        var cachedBook = bookCacheRepository.getCachedBook(isbn);
+        if(cachedBook.isPresent()) {
+            return new CachedResponse<>(cachedBook.get(), true);
+        } else {
+            log.debug("Book with ISBN '{}' not found in cache, attempting to fetch from DB", isbn);
+            Book book = bookRepository.getBook(isbn);
+            //cache this book
+            bookCacheRepository.cacheBook(book);
+            return new CachedResponse<>(book, false);
+        }
     }
 
     public Book createBook(Book book) {
@@ -51,7 +67,7 @@ public class BookService {
      * set the 'imagePath' field of the book entity to the new S3 key.
      */
     public Book updateBookImage(String isbn, MultipartFile image) {
-        Book book = getBook(isbn);
+        Book book = bookRepository.getBook(isbn);
         String s3Key;
         try {
             //check contents
@@ -71,11 +87,13 @@ public class BookService {
     }
 
     public void deleteBook(String isbn) {
-        Book book = getBook(isbn);
+        Book book = bookRepository.getBook(isbn);
         if(book.getImagePath() != null) {
             bookImagesService.deleteImage(book.getImagePath());
         }
         bookRepository.deleteBook(isbn);
+        //also clear from cache
+        bookCacheRepository.clearCachedBook(isbn);
         log.info("Deleted book: {}", book);
     }
 

@@ -15,6 +15,10 @@ infrastructure:
   book-images-bucket:
     url: ${APP_AWS_S3_BOOK_IMAGES_BUCKET_URL}
     name: ${APP_AWS_S3_BOOK_IMAGES_BUCKET_NAME}
+  elasticache-cluster:
+    url: ${APP_AWS_ELASTICACHE_CLUSTER_URL}
+    port: ${APP_AWS_ELASTICACHE_CLUSTER_PORT}
+    time-to-live: ${APP_AWS_ELASTICACHE_CLUSTER_TTL} # in seconds
 
 book-api:
   validation:

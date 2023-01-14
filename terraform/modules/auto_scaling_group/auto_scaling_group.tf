@@ -17,6 +17,12 @@ resource "aws_autoscaling_group" "app_autoscaling_group" {
   target_group_arns = [
     var.alb_target_group_arn
   ]
+
+  tag {
+    key                 = "Name"
+    propagate_at_launch = true
+    value               = "Inst-${var.application_name}-${var.aws_region}-${var.environment}"
+  }
 }
 
 resource "aws_autoscaling_policy" "app_scale_up_policy" {

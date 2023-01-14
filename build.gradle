@@ -37,6 +37,7 @@ ext {
 	mapstructVersion = '1.5.3.Final'
 	testcontainersVersion = '1.17.6'
 	apacheCommonsVersion = '3.12.0'
+	memcachedClientVersion = '2.12.3'
 }
 
 dependencies {
@@ -51,6 +52,9 @@ dependencies {
 	implementation 'software.amazon.awssdk:s3'
 	implementation 'software.amazon.awssdk:dynamodb-enhanced'
 	implementation 'software.amazon.awssdk:regions'
+
+	//Cache
+	implementation 'net.spy:spymemcached:' + memcachedClientVersion
 
 	//Others
 	implementation 'org.mapstruct:mapstruct:' + mapstructVersion

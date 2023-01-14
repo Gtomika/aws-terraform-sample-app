@@ -15,8 +15,10 @@ import com.epam.cloudx.aws.domain.Book;
 import com.epam.cloudx.aws.exceptions.BookDuplicationException;
 import com.epam.cloudx.aws.exceptions.BookImageInvalidException;
 import com.epam.cloudx.aws.exceptions.BookNotFoundException;
+import com.epam.cloudx.aws.repositories.BookCacheRepository;
 import com.epam.cloudx.aws.repositories.BookRepository;
 import java.nio.file.Path;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -37,23 +39,45 @@ class BookServiceTest {
     @Mock
     private BookImagesService bookImagesService;
 
+    @Mock
+    private BookCacheRepository bookCacheRepository;
+
     private BookService bookService;
 
     @BeforeEach
     public void setUp() {
-        bookService = new BookService(bookRepository, bookValidatorService, bookImagesService);
+        bookService = new BookService(
+                bookRepository,
+                bookValidatorService,
+                bookImagesService,
+                bookCacheRepository
+        );
     }
 
     @Test
     public void shouldGetBook() {
         Book expectedBook = testBook();
+
         when(bookRepository.getBook(TEST_ISBN)).thenReturn(expectedBook);
-        Book resultBook = bookService.getBook(TEST_ISBN);
+        when(bookCacheRepository.getCachedBook(TEST_ISBN)).thenReturn(Optional.empty());
+
+        Book resultBook = bookService.getBook(TEST_ISBN).getData();
+        assertEquals(expectedBook, resultBook);
+    }
+
+    @Test
+    public void shouldGetBookFromCache() {
+        Book expectedBook = testBook();
+
+        when(bookCacheRepository.getCachedBook(TEST_ISBN)).thenReturn(Optional.of(expectedBook));
+
+        Book resultBook = bookService.getBook(TEST_ISBN).getData();
         assertEquals(expectedBook, resultBook);
     }
 
     @Test
     public void shouldNotGetNotExistingBook() {
+        when(bookCacheRepository.getCachedBook(TEST_ISBN)).thenReturn(Optional.empty());
         when(bookRepository.getBook(TEST_ISBN)).thenThrow(BookNotFoundException.class);
         assertThrows(BookNotFoundException.class, () -> bookService.getBook(TEST_ISBN));
     }
@@ -127,12 +151,14 @@ class BookServiceTest {
 
     @Test
     public void shouldDeleteBook() {
+        Book expectedBook = testBook();
+        when(bookRepository.getBook(TEST_ISBN)).thenReturn(expectedBook);
         assertDoesNotThrow(() -> bookService.deleteBook(TEST_ISBN));
     }
 
     @Test
     public void shouldNotDeleteNotExistingBook() {
-        doThrow(BookNotFoundException.class).when(bookRepository).deleteBook(TEST_ISBN);
+        doThrow(BookNotFoundException.class).when(bookRepository).getBook(TEST_ISBN);
         assertThrows(BookNotFoundException.class, () -> bookService.deleteBook(TEST_ISBN));
     }
 

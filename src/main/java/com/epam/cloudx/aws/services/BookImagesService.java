@@ -4,6 +4,7 @@ import com.epam.cloudx.aws.exceptions.BookApiException;
 import com.epam.cloudx.aws.exceptions.BookImageInvalidException;
 import java.nio.file.Path;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -24,6 +25,7 @@ import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 @RequiredArgsConstructor
 public class BookImagesService {
 
+    @Setter(onMethod_ = {@Value("${infrastructure.book-images-bucket.name}")})
     private String bookImagesBucket;
 
     private final S3Client s3Client;
@@ -93,11 +95,6 @@ public class BookImagesService {
         //validated before, it will match this format
         String imageExtension = contentType.split("/")[1];
         return isbn + "." + imageExtension;
-    }
-
-    @Value("${infrastructure.book-images-bucket.name}")
-    public void setBookImagesBucket(String bookImagesBucket) {
-        this.bookImagesBucket = bookImagesBucket;
     }
 
     private void logAndThrow(String message, Exception e) {

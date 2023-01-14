@@ -5,11 +5,14 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.epam.cloudx.aws.IntegrationTestInitializer;
+import com.epam.cloudx.aws.controllers.BookController;
 import com.epam.cloudx.aws.domain.Book;
+import com.epam.cloudx.aws.repositories.BookCacheRepository;
 import com.epam.cloudx.aws.repositories.BookRepository;
 import com.epam.cloudx.aws.utils.BookTestUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -54,6 +57,9 @@ public class BookControllerIntegrationTest extends IntegrationTestInitializer {
     private BookRepository bookRepository;
 
     @Autowired
+    private BookCacheRepository bookCacheRepository;
+
+    @Autowired
     private MockMvc mockMvc;
 
     private final ObjectMapper jsonMapper = new ObjectMapper();
@@ -76,18 +82,30 @@ public class BookControllerIntegrationTest extends IntegrationTestInitializer {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.isbn").value(TEST_BOOK.getIsbn()))
                 .andExpect(jsonPath("$.title").value(TEST_BOOK.getTitle()))
-                .andExpect(jsonPath("$.imageUrl").doesNotExist());
+                .andExpect(jsonPath("$.imageUrl").doesNotExist())
+                .andExpect(header().string(BookController.CACHE_HIT_HEADER, "false"));
     }
 
     @Test
     @Order(3)
+    public void shouldGetBookCached() throws Exception {
+        mockMvc.perform(get(BOOK_ISBN_URL, TEST_BOOK.getIsbn()).accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.isbn").value(TEST_BOOK.getIsbn()))
+                .andExpect(jsonPath("$.title").value(TEST_BOOK.getTitle()))
+                .andExpect(jsonPath("$.imageUrl").doesNotExist())
+                .andExpect(header().string(BookController.CACHE_HIT_HEADER, "true"));
+    }
+
+    @Test
+    @Order(4)
     public void shouldNotFindNotExistingBook() throws Exception {
         mockMvc.perform(get(BOOK_ISBN_URL, NOT_EXISTING_ISBN).accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound());
     }
 
     @Test
-    @Order(4)
+    @Order(5)
     public void shouldUpdateBook() throws Exception {
         Book updatedBook = BookTestUtils.testBook();
         updatedBook.setTitle("Something else");
@@ -101,7 +119,7 @@ public class BookControllerIntegrationTest extends IntegrationTestInitializer {
     }
 
     @Test
-    @Order(5)
+    @Order(6)
     public void shouldNotUpdateNotExistingBook() throws Exception {
         Book updatedBook = BookTestUtils.testBook();
         updatedBook.setIsbn(NOT_EXISTING_ISBN);
@@ -113,7 +131,7 @@ public class BookControllerIntegrationTest extends IntegrationTestInitializer {
     }
 
     @Test
-    @Order(6)
+    @Order(7)
     public void shouldNotUpdateBookIsbn() throws Exception {
         Book updatedBook = BookTestUtils.testBook();
         updatedBook.setIsbn(NOT_EXISTING_ISBN);
@@ -125,7 +143,7 @@ public class BookControllerIntegrationTest extends IntegrationTestInitializer {
     }
 
     @Test
-    @Order(7)
+    @Order(8)
     @Disabled("Localstack produces 500 internal error on upload. See README.")
     public void shouldUpdateBookImage() throws Exception {
         mockMvc.perform(multipart(BOOK_IMAGE_URL, TEST_BOOK.getIsbn())
@@ -138,12 +156,13 @@ public class BookControllerIntegrationTest extends IntegrationTestInitializer {
     }
 
     @Test
-    @Order(7) //TODO remove this when localstack S3 issue is resolved
+    @Order(8) //TODO remove this when localstack S3 issue is resolved
     public void shouldReturnAbsoluteLogoUrl() throws Exception {
         //manually setting logo path for the entity
         Book book = BookTestUtils.testBook();
         book.setImagePath(book.getIsbn() + ".jpg");
         bookRepository.createOrUpdateBook(book);
+        bookCacheRepository.clearCachedBook(book.getIsbn());
 
         mockMvc.perform(get(BOOK_ISBN_URL, book.getIsbn())
                 .accept(MediaType.APPLICATION_JSON))
@@ -155,7 +174,7 @@ public class BookControllerIntegrationTest extends IntegrationTestInitializer {
     }
 
     @Test
-    @Order(8)
+    @Order(9)
     public void shouldNotUpdateNotExistingBookImage() throws Exception {
         mockMvc.perform(multipart(BOOK_IMAGE_URL, NOT_EXISTING_ISBN)
                 .file(getTestImage())
@@ -165,7 +184,7 @@ public class BookControllerIntegrationTest extends IntegrationTestInitializer {
     }
 
     @Test
-    @Order(9)
+    @Order(10)
     public void shouldNotUpdateInvalidBookImage() throws Exception {
         var invalidImage = new MockMultipartFile("image", "book.jpg", "random-content-type", new byte[]{1,2});
         mockMvc.perform(multipart(BOOK_IMAGE_URL, TEST_BOOK.getIsbn())
@@ -176,7 +195,7 @@ public class BookControllerIntegrationTest extends IntegrationTestInitializer {
     }
 
     @Test
-    @Order(10)
+    @Order(11)
     public void shouldDeleteBook() throws Exception {
         mockMvc.perform(delete(BOOK_ISBN_URL, TEST_BOOK.getIsbn())
                 .contentType(MediaType.APPLICATION_JSON))
@@ -184,6 +203,7 @@ public class BookControllerIntegrationTest extends IntegrationTestInitializer {
     }
 
     @Test
+    @Order(12)
     public void shouldNotDeleteNotExistingBook() throws Exception {
         mockMvc.perform(delete(BOOK_ISBN_URL, NOT_EXISTING_ISBN)
                         .contentType(MediaType.APPLICATION_JSON))

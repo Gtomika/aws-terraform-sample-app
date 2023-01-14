@@ -10,6 +10,7 @@ import java.time.Duration;
 import org.junit.jupiter.api.BeforeAll;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
+import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.localstack.LocalStackContainer;
 
 
@@ -29,8 +30,15 @@ public class IntegrationTestInitializer {
             .withServices(S3, DYNAMODB)
             .withReuse(false);
 
+    public static GenericContainer<?> memcachedContainer = new GenericContainer<>(instance()
+            .apply(parse("memcached"))
+            .asCompatibleSubstituteFor("memcached"))
+            .withExposedPorts(11211);
+
     @BeforeAll
     public static void startTestContainers() {
+        memcachedContainer.start();
+
         localStackContainer.start();
         localStackContainer.withStartupTimeout(Duration.ofSeconds(5));
 
@@ -73,6 +81,10 @@ public class IntegrationTestInitializer {
         ));
         registry.add("infrastructure.book-images-bucket.name", () -> MOCK_BUCKET_NAME);
         registry.add("logging.level.com.epam.cloudx.aws", () -> "DEBUG");
+
+        registry.add("infrastructure.elasticache-cluster.url", () -> memcachedContainer.getHost());
+        registry.add("infrastructure.elasticache-cluster.port", () -> memcachedContainer.getFirstMappedPort());
+        registry.add("infrastructure.elasticache-cluster.time-to-live", () -> 60);
     }
 
 }
