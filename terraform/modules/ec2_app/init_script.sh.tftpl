@@ -1,0 +1,16 @@
+#!/bin/bash
+sudo apt update -y
+sudo amazon-linux-extras install java-openjdk11 -y
+mkdir -p server
+cd server
+aws s3 cp s3://${artifacts_bucket_name}/${application_artifact_name} ${application_artifact_name}
+export APP_ENVIRONMENT="${environment}"
+export APP_PORT="${application_port}"
+export APP_AWS_REGION="${aws_region}"
+export APP_AWS_DYNAMODB_BOOK_DATA_TABLE_NAME="${data_table_name}"
+export APP_AWS_S3_BOOK_IMAGES_BUCKET_URL="https://${images_bucket_name}.s3.${aws_region}.amazonaws.com"
+export APP_AWS_S3_BOOK_IMAGES_BUCKET_NAME="${images_bucket_name}"
+export APP_AWS_ELASTICACHE_CLUSTER_URL="${cache_cluster_private_dns}"
+export APP_AWS_ELASTICACHE_CLUSTER_PORT="${cache_cluster_port}"
+export APP_AWS_ELASTICACHE_CLUSTER_TTL="${book_cache_ttl}"
+java -jar ${application_artifact_name}

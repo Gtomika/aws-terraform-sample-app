@@ -27,6 +27,19 @@ module "dynamodb" {
     hash_key_name = var.book_data_table_key
 }
 
+module "elasticache" {
+    source = "./modules/elasticache"
+    aws_region = var.aws_region
+    application_name = var.application_name
+    environment = var.environment
+    cache_cluster_nodes = var.cache_cluster_nodes
+    cache_cluster_type = var.cache_cluster_type
+    aws_availability_zones = var.aws_availability_zones
+
+    vpc_id = module.vpc.vpc_id
+    private_subnet_ids = module.vpc.private_subnet_ids
+}
+
 # bastion host
 module "bastion_ec2" {
     source = "./modules/ec2_bastion"
@@ -51,6 +64,7 @@ module "app_ec2" {
     environment = var.environment
     instance_type = var.ec2_instance_type
     ami_id = var.ec2_ami
+    book_cache_ttl = var.cached_book_ttl
 
     vpc_id = module.vpc.vpc_id
     images_bucket_arn = module.s3.bucket_arn
@@ -59,6 +73,8 @@ module "app_ec2" {
     data_table_arn = module.dynamodb.table_arn
     data_table_name = module.dynamodb.table_name
     internal_security_group_id = module.vpc.internal_security_group_id
+    cache_cluster_private_dns = module.elasticache.cache_cluster_private_dns
+    cache_cluster_port = module.elasticache.cache_cluster_port
 }
 
 # Set up application load balancer

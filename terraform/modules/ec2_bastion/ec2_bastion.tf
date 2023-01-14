@@ -4,7 +4,7 @@
 # Build security group
 resource "aws_security_group" "bastion_security_group" {
   vpc_id = var.vpc_id
-  name = "Bsg-${var.application_name}-${var.aws_region}-${var.environment}"
+  name = "Bastion-${var.application_name}-${var.aws_region}-${var.environment}"
   description = "Security for bastion host"
 }
 

@@ -53,3 +53,15 @@ variable "application_artifact_name" {
 variable "internal_security_group_id" {
   type = string
 }
+
+variable "cache_cluster_private_dns" {
+  type = string
+}
+
+variable "cache_cluster_port" {
+  type = number
+}
+
+variable "book_cache_ttl" {
+  type = number
+}

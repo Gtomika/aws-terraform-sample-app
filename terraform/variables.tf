@@ -131,3 +131,26 @@ variable "scale_down_at_cpu_usage" {
     error_message = "Must be 1-99"
   }
 }
+
+variable "cached_book_ttl" {
+  type = number
+  default = "Amount of seconds for how long the ElastiCache should cache books"
+  validation {
+    condition = var.cached_book_ttl > 0
+    error_message = "Cache TTL must be positive"
+  }
+}
+
+variable "cache_cluster_nodes" {
+  type = number
+  default = "Amount of nodes (instances) to run in the ElastiCache cluster"
+  validation {
+    condition = var.cache_cluster_nodes > 0
+    error_message = "Cluster node count must be positive"
+  }
+}
+
+variable "cache_cluster_type" {
+  type = string
+  description = "Instance type to use for ElastiCache cluster nodes"
+}

@@ -1,7 +1,8 @@
 # Provision security group ------------------------------
 resource "aws_security_group" "app_security_group" {
-  name = "Sg-${var.application_name}-${var.aws_region}-${var.environment}"
+  name = "App-${var.application_name}-${var.aws_region}-${var.environment}"
   vpc_id = var.vpc_id
+  description = "Security group for the ${var.application_name} instances"
 }
 
 resource "aws_security_group_rule" "allow_all_outbound" {
@@ -98,6 +99,23 @@ resource "aws_iam_instance_profile" "iam_instance_profile" {
   role = aws_iam_role.iam_instance_role.name
 }
 
+# in this map all variables used inside the init script must be given a value
+variable "init_script_config_map" {
+  type = any
+  default = {
+    artifacts_bucket_name = var.artifacts_bucket_name
+    application_artifact_name = var.application_artifact_name
+    environment = var.environment
+    application_port = var.application_port
+    aws_region = var.aws_region
+    data_table_name = var.data_table_name
+    images_bucket_name = var.images_bucket_name
+    cache_cluster_private_dns = var.cache_cluster_private_dns
+    cache_cluster_port = var.cache_cluster_port
+    book_cache_ttl = var.book_cache_ttl
+  }
+}
+
 # Describe Ec2 instance launch template
 resource "aws_launch_template" "app_launch_template" {
   name = "Tmp-${var.application_name}-${var.aws_region}-${var.environment}"
@@ -116,22 +134,7 @@ resource "aws_launch_template" "app_launch_template" {
     var.internal_security_group_id
   ]
 
-  user_data = base64encode(<<EOF
-  #!/bin/bash
-  sudo apt update -y
-  sudo amazon-linux-extras install java-openjdk11 -y
-  mkdir -p server
-  cd server
-  aws s3 cp s3://${var.artifacts_bucket_name}/${var.application_artifact_name} ${var.application_artifact_name}
-  export APP_ENVIRONMENT="${var.environment}"
-  export APP_PORT="${var.application_port}"
-  export APP_AWS_REGION="${var.aws_region}"
-  export APP_AWS_DYNAMODB_BOOK_DATA_TABLE_NAME="${var.data_table_name}"
-  export APP_AWS_S3_BOOK_IMAGES_BUCKET_URL="https://${var.images_bucket_name}.s3.${var.aws_region}.amazonaws.com"
-  export APP_AWS_S3_BOOK_IMAGES_BUCKET_NAME="${var.images_bucket_name}"
-  java -jar ${var.application_artifact_name}
-  EOF
-  )
+  user_data = base64encode(templatefile("${path.module}/init_script.sh.tftpl", init_script_config_map))
 
   disable_api_termination = false
   disable_api_stop = false
