@@ -32,6 +32,6 @@ scale_up_at_cpu_usage = 70 #%
 scale_down_at_cpu_usage = 30 #%
 
 # Elasticache
-cache_cluster_nodes = 2 #must equal to amount of AZs for best performance
+cache_cluster_nodes = 1 #should equal to amount of AZs for best performance
 cache_cluster_type = "cache.t2.micro"
 cached_book_ttl = 60 #seconds
