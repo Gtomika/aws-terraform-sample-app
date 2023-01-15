@@ -11,6 +11,7 @@ resource "aws_security_group_rule" "allow_inbound_cache_port_rule" {
   from_port         = var.cache_cluster_port
   to_port           = var.cache_cluster_port
   protocol          = "tcp"
+  cidr_blocks       = ["0.0.0.0/0"]
   security_group_id = aws_security_group.cache_cluster_security_group.id
   description = "Allow inbound traffic on cache cluster port ${var.cache_cluster_port}"
 }

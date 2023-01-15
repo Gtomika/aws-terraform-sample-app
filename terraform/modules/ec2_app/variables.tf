@@ -65,3 +65,20 @@ variable "cache_cluster_port" {
 variable "book_cache_ttl" {
   type = number
 }
+
+locals {
+  # in this map all variables used inside the init script template must be given a value
+  # 'init_script.sh.tftpl'
+  init_script_config_map = {
+    artifacts_bucket_name = var.artifacts_bucket_name
+    application_artifact_name = var.application_artifact_name
+    environment = var.environment
+    application_port = var.application_port
+    aws_region = var.aws_region
+    data_table_name = var.data_table_name
+    images_bucket_name = var.images_bucket_name
+    cache_cluster_private_dns = var.cache_cluster_private_dns
+    cache_cluster_port = var.cache_cluster_port
+    book_cache_ttl = var.book_cache_ttl
+  }
+}

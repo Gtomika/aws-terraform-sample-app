@@ -34,7 +34,6 @@ module "elasticache" {
     environment = var.environment
     cache_cluster_nodes = var.cache_cluster_nodes
     cache_cluster_type = var.cache_cluster_type
-    aws_availability_zones = var.aws_availability_zones
 
     vpc_id = module.vpc.vpc_id
     private_subnet_ids = module.vpc.private_subnet_ids

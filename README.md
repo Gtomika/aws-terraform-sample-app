@@ -25,7 +25,8 @@ May contain not yet implemented resources, and some newly added components might
 
 ![archi.png](images/AwsSampleApp.drawio.png)
 
-Depending on autoscaling group desired capacity, some private subnets may not have any instances.
+Depending on autoscaling group desired capacity and cache cluster 
+node count, some private subnets may not have any instances.
 
 ## CI/CD
 
@@ -52,7 +53,7 @@ them:
  - ~~Provision load balancer and auto-scaling group instead of just 
 plain EC2 instance.~~ ✔
  - ~~Multi AZ deployment support~~ ✔
- - Add caching solution: AWS ElastiCache
+ - ~~Add caching solution: AWS ElastiCache~~ ✔
  - ~~Use VPC endpoints to reach S3 and DynamoDB instead of connecting
 through the public internet.~~ ✔
  - ~~Don't associate public IP address to each EC2 instance. Create private subnets. Find way how to be able to SSH 

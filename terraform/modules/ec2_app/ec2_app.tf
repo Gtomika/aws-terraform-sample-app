@@ -99,23 +99,6 @@ resource "aws_iam_instance_profile" "iam_instance_profile" {
   role = aws_iam_role.iam_instance_role.name
 }
 
-# in this map all variables used inside the init script must be given a value
-variable "init_script_config_map" {
-  type = any
-  default = {
-    artifacts_bucket_name = var.artifacts_bucket_name
-    application_artifact_name = var.application_artifact_name
-    environment = var.environment
-    application_port = var.application_port
-    aws_region = var.aws_region
-    data_table_name = var.data_table_name
-    images_bucket_name = var.images_bucket_name
-    cache_cluster_private_dns = var.cache_cluster_private_dns
-    cache_cluster_port = var.cache_cluster_port
-    book_cache_ttl = var.book_cache_ttl
-  }
-}
-
 # Describe Ec2 instance launch template
 resource "aws_launch_template" "app_launch_template" {
   name = "Tmp-${var.application_name}-${var.aws_region}-${var.environment}"
@@ -134,7 +117,10 @@ resource "aws_launch_template" "app_launch_template" {
     var.internal_security_group_id
   ]
 
-  user_data = base64encode(templatefile("${path.module}/init_script.sh.tftpl", init_script_config_map))
+  user_data = base64encode(templatefile(
+    "${path.module}/init_script.sh.tftpl",
+    local.init_script_config_map
+  ))
 
   disable_api_termination = false
   disable_api_stop = false
