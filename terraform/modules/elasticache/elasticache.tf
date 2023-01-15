@@ -23,7 +23,8 @@ resource "aws_elasticache_subnet_group" "cache_cluster_subnet_group" {
 }
 
 resource "aws_elasticache_cluster" "app_cache_cluster" {
-  cluster_id = "${var.application_name}-${var.aws_region}-${var.environment}"
+  # only accepts lowercase letters, numbers and hyphens
+  cluster_id = "${lower(var.application_name)}-${var.aws_region}-${var.environment}"
 
   engine = var.cache_cluster_engine
   num_cache_nodes = var.cache_cluster_nodes
