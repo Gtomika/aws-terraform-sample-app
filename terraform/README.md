@@ -12,6 +12,10 @@ The IaC consists of the root module and submodules, located in the
 
 I didn't use any pre-written Terraform modules because the goal of this project is to learn the basics.
 
+Applying this configuration (assuming none of the resources exist yet) takes around 8-10 minutes. The 
+load balancer (~5 min) and the ElastiCache cluster(~4 min) take the longest to be created. Destruction 
+of the resources takes about the same time.
+
 ## Terraform inputs
 
 The following inputs are required to make this configuration work:
@@ -33,11 +37,12 @@ Additionally, the ``backend.hcl`` file also must be provided.
 ## Terraform user and permissions
 
 Terraform scripts are using the credentials of the AWS IAM user ``terraform``. These 
-are provided as GitLab project secrets and are not version controlled. The Terraform user 
-has only the necessary permissions to be able to apply this configuration.
+are provided as GitLab project secrets and are not version controlled. Unfortunately there is a 
+limit of 10 policies for user groups, which I hit when adding policies to `terraform` IAM user's group. 
 
-All the IAM policies that Terraform needs are in the ``iam_policies`` directory (with sensitive 
-info removed).
+A proper solution would be to aggregate my separate policies into 1, but I was too lazy to do that, 
+so instead `terraform` now just gets `PowerUserAccess` policy. This violates the principle of 
+least privilege.
 
 ## Terraform state file
 

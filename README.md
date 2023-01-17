@@ -43,7 +43,7 @@ The EC2 instance will grab it from this bucket later.
  - Terraform-plan: Validate terraform config and create plan to apply it.
  - Terraform-deploy: Use the plan to create or destroy the infrastructure.
 
-[Example of a passed pipeline](https://git.epam.com/tamas_gaspar2/aws-sample-app/-/pipelines/2641950).
+[Example of a passed pipeline](https://git.epam.com/tamas_gaspar2/aws-sample-app/-/pipelines/2651751).
 
 ## Possible improvements
 
