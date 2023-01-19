@@ -42,13 +42,3 @@ output "bastion_host_public_url" {
   value = "http://${module.bastion_ec2.bastion_host_url}"
   description = "Bastion host can be found at this URL (only accessible with SSH from my IP)"
 }
-
-output "images_bucket_name" {
-  value = module.s3.bucket_name
-  description = "Name of the book images S3 bucket"
-}
-
-output "data_table_name" {
-  value = module.dynamodb.table_name
-  description = "Name of the book data DynamoDB table"
-}

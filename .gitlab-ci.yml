@@ -1,4 +1,5 @@
 stages:
+  - prereqs
   - build
   - publish
   - test
@@ -16,6 +17,16 @@ variables:
   GRADLE_IMAGE: gradle:jdk11
   AWS_CLI_IMAGE: amazon/aws-cli
   TERRAFORM_IMAGE: hashicorp/terraform
+  UBUNTU_IMAGE: ubuntu
+
+.prereqs-job-template:
+  stage: prereqs
+  image: $AWS_CLI_IMAGE
+  rules:
+    - if $MANAGE_PREREQS == "true"
+    - when: on_success
+  when: manual
+  allow_failure: false
 
 .gradle-job-template:
   image: $GRADLE_IMAGE
@@ -34,6 +45,20 @@ variables:
       -backend-config="access_key=$TERRAFORM_AWS_ACCESS_KEY"
       -backend-config="secret_key=$TERRAFORM_AWS_SECRET_KEY"
 
+provision-prereqs: # create all infrastructure that is required FOR CI/CD and terraform to be able to function
+  extends: .prereqs-job-template
+  script:
+    - aws s3api create-bucket --bucket $TERRAFORM_STATE_BUCKET_NAME
+    - aws s3api create-bucket --bucket $ARTIFACTS_BUCKET_NAME
+    - aws s3api create-bucket --bucket $LAMBDA_SOURCE_BUCKET_NAME
+
+destroy-prereqs: # destroy all prerequisite infrastructure
+  extends: .prereqs-job-template
+  script:
+    - aws s3 rb s3://$TERRAFORM_STATE_BUCKET_NAME --force
+    - aws s3 rb s3://$ARTIFACTS_BUCKET_NAME --force
+    - aws s3 rb s3://$LAMBDA_SOURCE_BUCKET_NAME --force
+
 build-jar: # package app into runnable JAR
   stage: build
   extends: .gradle-job-template
@@ -51,6 +76,20 @@ build-jar: # package app into runnable JAR
       - build/libs
     expire_in: 1 hour
 
+build-lambdas:
+  stage: build
+  image: $UBUNTU_IMAGE
+  script:
+    - sudo apt-get install zip
+    - cd lambda
+    - echo Zipping manage book icons lambda, found at lambda/$MANAGE_BOOK_ICONS_LAMBDA_SOURCE
+    - zip -r "$MANAGE_BOOK_ICONS_LAMBDA_SOURCE".zip $MANAGE_BOOK_ICONS_LAMBDA_SOURCE
+    - echo Created zipped source code lambda/"$MANAGE_BOOK_ICONS_LAMBDA_SOURCE".zip
+  artifacts:
+    paths:
+      - lambda/$MANAGE_BOOK_ICONS_LAMBDA_SOURCE.zip
+    expire_in: 1 hour
+
 upload-jar: # upload runnable JAR to S3 -> to be downloaded to EC2 instance
   stage: publish
   image: $AWS_CLI_IMAGE
@@ -62,6 +101,20 @@ upload-jar: # upload runnable JAR to S3 -> to be downloaded to EC2 instance
     - echo Artifact upload successful
   needs:
     - build-jar
+  only:
+    - main
+
+upload-lambdas: # upload lambda sources as ZIP to s3 bucket
+  stage: publish
+  image: $AWS_CLI_IMAGE
+  script:
+    - echo Zipped source code for manage book icons lambda is expected at lambda/"$MANAGE_BOOK_ICONS_LAMBDA_SOURCE".zip
+    - export MANAGE_BOOK_ICONS_VERSIONED_KEY="$MANAGE_BOOK_ICONS_LAMBDA_SOURCE"_"$CI_COMMIT_SHORT_SHA".zip
+    - echo Uploading manage book icons lambda source to S3 bucket $LAMBDA_SOURCE_BUCKET_NAME using key $MANAGE_BOOK_ICONS_VERSIONED_KEY
+    - aws s3api put-object --bucket $LAMBDA_SOURCE_BUCKET_NAME --key $MANAGE_BOOK_ICONS_VERSIONED_KEY --body ./lambda/"$MANAGE_BOOK_ICONS_LAMBDA_SOURCE".zip
+    - echo Lambda source code upload successful
+  needs:
+    - build-lambdas
   only:
     - main
 
@@ -79,6 +132,19 @@ delete-jar: # cleanup job -> delete JAR from artifacts bucket
     - main
   when: manual
   allow_failure: true
+
+delete-lambdas:
+  stage: publish
+  image: $AWS_CLI_IMAGE
+  script:
+    - export MANAGE_BOOK_ICONS_VERSIONED_KEY="$MANAGE_BOOK_ICONS_LAMBDA_SOURCE"_"$CI_COMMIT_SHORT_SHA".zip
+    - echo Zipped source code for manage book icons lambda is expected in bucket $LAMBDA_SOURCE_BUCKET_NAME with key $MANAGE_BOOK_ICONS_VERSIONED_KEY
+    - aws s3 rm s3://"$LAMBDA_SOURCE_BUCKET_NAME"/"$MANAGE_BOOK_ICONS_VERSIONED_KEY"
+    - echo Source code for manage book lambda removed from s3.
+  needs:
+    - upload-lambdas
+  only:
+    - main
 
 spotless-check:
   stage: test
@@ -130,6 +196,7 @@ terraform-plan:
   extends: .terraform-job-template
   script:
     - export ARTIFACT_VERSIONED_NAME="$APP_NAME"_"$CI_COMMIT_SHORT_SHA".jar
+    - export MANAGE_BOOK_ICONS_VERSIONED_KEY="$MANAGE_BOOK_ICONS_LAMBDA_SOURCE"_"$CI_COMMIT_SHORT_SHA".zip
     - echo Create Terraform plan...
     - terraform plan -out=tfplan 
       -var-file=inputs.tfvars
@@ -140,6 +207,8 @@ terraform-plan:
       -var aws_account_id="$AWS_ACCOUNT_ID" 
       -var artifacts_bucket_name="$ARTIFACTS_BUCKET_NAME" 
       -var application_artifact_name="$ARTIFACT_VERSIONED_NAME"
+      -var lambda_sources_bucket_name="$LAMBDA_SOURCE_BUCKET_NAME"
+      -var manage_book_icons_lambda_source_object_key="$MANAGE_BOOK_ICONS_VERSIONED_KEY"
     - echo Plan complete, review carefully!
   artifacts:
     paths:
@@ -172,6 +241,8 @@ terraform-destroy:
   stage: terraform-deploy
   extends: .terraform-job-template
   script:
+    - export ARTIFACT_VERSIONED_NAME="$APP_NAME"_"$CI_COMMIT_SHORT_SHA".jar
+    - export MANAGE_BOOK_ICONS_VERSIONED_KEY="$MANAGE_BOOK_ICONS_LAMBDA_SOURCE"_"$CI_COMMIT_SHORT_SHA".zip
     - echo Destroying infrastructure...
     - terraform destroy -auto-approve 
       -var-file=inputs.tfvars 
@@ -182,6 +253,8 @@ terraform-destroy:
       -var aws_account_id="$AWS_ACCOUNT_ID" 
       -var artifacts_bucket_name="$ARTIFACTS_BUCKET_NAME" 
       -var application_artifact_name="$ARTIFACT_VERSIONED_NAME"
+      -var lambda_sources_bucket_name="$LAMBDA_SOURCE_BUCKET_NAME"
+      -var manage_book_icons_lambda_source_object_key="$MANAGE_BOOK_ICONS_VERSIONED_KEY"
     - echo Infrastructure was destroyed successfully!
   when: manual
   only:

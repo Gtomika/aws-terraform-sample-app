@@ -26,24 +26,22 @@ variable "vpc_id" {
   type = string
 }
 
-variable "images_bucket_arn" {
-  type = string
-}
-
-variable "images_bucket_name" {
-  type = string
+variable "images_bucket" {
+  type = object({
+    name = string
+    arn = string
+  })
 }
 
 variable "artifacts_bucket_name" {
   type = string
 }
 
-variable "data_table_arn" {
-  type = string
-}
-
-variable "data_table_name" {
-  type = string
+variable "data_table" {
+  type = object({
+    name = string
+    arn = string
+  })
 }
 
 variable "application_artifact_name" {
@@ -75,8 +73,8 @@ locals {
     environment = var.environment
     application_port = var.application_port
     aws_region = var.aws_region
-    data_table_name = var.data_table_name
-    images_bucket_name = var.images_bucket_name
+    data_table_name = var.data_table.name
+    images_bucket_name = var.images_bucket.name
     cache_cluster_private_dns = var.cache_cluster_private_dns
     cache_cluster_port = var.cache_cluster_port
     book_cache_ttl = var.book_cache_ttl

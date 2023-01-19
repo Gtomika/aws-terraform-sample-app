@@ -1,6 +1,6 @@
 # Create DynamoDB table for book data
 
-resource "aws_dynamodb_table" "dynamodb_table" {
+resource "aws_dynamodb_table" "book_data_table" {
   name = "${var.table_name}-${var.aws_region}-${var.environment}"
   billing_mode   = "PROVISIONED"
   read_capacity = 5

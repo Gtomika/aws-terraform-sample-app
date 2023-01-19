@@ -18,10 +18,13 @@ ec2_instance_type = "t2.micro"
 
 # S3
 book_images_bucket_name = "tamas-gaspar-epam-cloudx-book-images"
+book_icons_bucket_name = "tamas-gaspar-epam-cloudx-book-icons"
 
 # DynamoDB
 book_data_table_name = "TamasGasparEpamCloudxBookData"
 book_data_table_key = "isbn"
+
+# Lambda source bucket and key come from Ci/Cd pipeline
 
 # Autoscaling group
 asg_min_instances = 1

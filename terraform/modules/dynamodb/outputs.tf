@@ -1,7 +1,3 @@
-output "table_arn" {
-  value = aws_dynamodb_table.dynamodb_table.arn
-}
-
-output "table_name" {
-  value = aws_dynamodb_table.dynamodb_table.name
+output "book_data_table" {
+  value = aws_dynamodb_table.book_data_table
 }

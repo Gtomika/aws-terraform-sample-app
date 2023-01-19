@@ -62,7 +62,12 @@ variable "ec2_instance_type" {
 
 variable "book_images_bucket_name" {
   type = string
-  description = "Name of S3 bucket in which book images is stored"
+  description = "Name of S3 bucket in which book images are stored"
+}
+
+variable "book_icons_bucket_name" {
+  type = string
+  description = "Name of S3 bucket in which book icons (small versions of images) are stored"
 }
 
 variable "artifacts_bucket_name" {
@@ -153,4 +158,14 @@ variable "cache_cluster_nodes" {
 variable "cache_cluster_type" {
   type = string
   description = "Instance type to use for ElastiCache cluster nodes"
+}
+
+variable "lambda_sources_bucket_name" {
+  type = string
+  description = "Name of S3 bucket where lambda source codes are found"
+}
+
+variable "manage_book_icons_lambda_source_object_key" {
+  type = string
+  description = "Key of ZIP file in 'lambda_sources_bucket_name' bucket which has the source code of the book image lambda function"
 }

@@ -31,8 +31,8 @@ data aws_iam_policy_document "iam_instance_policy_data" {
     sid = "FullAccessToBucketObjects"
     effect = "Allow"
     resources = [
-      var.images_bucket_arn,
-      "${var.images_bucket_arn}/*"
+      var.images_bucket.arn,
+      "${var.images_bucket.arn}/*"
     ]
     actions = [
       "s3:ListBucket",
@@ -42,7 +42,7 @@ data aws_iam_policy_document "iam_instance_policy_data" {
   statement { # Access to the book data DynamoDB table items
     sid = "FullAccessToTableItems"
     effect = "Allow"
-    resources = [ var.data_table_arn ]
+    resources = [ var.data_table.arn ]
     actions = [
       "dynamodb:DescribeTable",
       "dynamodb:Query",

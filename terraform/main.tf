@@ -13,7 +13,8 @@ module "s3" {
     aws_region = var.aws_region
     application_name = var.application_name
     environment = var.environment
-    bucket_name = var.book_images_bucket_name
+    book_images_bucket_name = var.book_images_bucket_name
+    book_icons_bucket_name = var.book_icons_bucket_name
     aws_account_id = var.aws_account_id
 }
 
@@ -66,11 +67,9 @@ module "app_ec2" {
     book_cache_ttl = var.cached_book_ttl
 
     vpc_id = module.vpc.vpc_id
-    images_bucket_arn = module.s3.bucket_arn
-    images_bucket_name = module.s3.bucket_name
+    images_bucket = module.s3.images_bucket
     artifacts_bucket_name = var.artifacts_bucket_name
-    data_table_arn = module.dynamodb.table_arn
-    data_table_name = module.dynamodb.table_name
+    data_table = module.dynamodb.book_data_table
     internal_security_group_id = module.vpc.internal_security_group_id
     cache_cluster_private_dns = module.elasticache.cache_cluster_private_dns
     cache_cluster_port = module.elasticache.cache_cluster_port

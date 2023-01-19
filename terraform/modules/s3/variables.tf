@@ -15,6 +15,10 @@ variable "application_name" {
   type = string
 }
 
-variable "bucket_name" {
+variable "book_images_bucket_name" {
+  type = string
+}
+
+variable "book_icons_bucket_name" {
   type = string
 }
