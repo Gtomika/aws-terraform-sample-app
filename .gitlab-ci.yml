@@ -85,7 +85,9 @@ build-lambdas:
   stage: build
   image: $UBUNTU_IMAGE
   script:
-    - apt-get --yes --force-yes install zip
+    - apt-get update -y
+    - apt-get upgrade -y
+    - apt-get -y install zip
     - cd lambda
     - echo Zipping manage book icons lambda, found at lambda/$MANAGE_BOOK_ICONS_LAMBDA_SOURCE
     - zip -r "$MANAGE_BOOK_ICONS_LAMBDA_SOURCE".zip $MANAGE_BOOK_ICONS_LAMBDA_SOURCE
