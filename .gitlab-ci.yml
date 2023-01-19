@@ -23,8 +23,9 @@ variables:
   stage: prereqs
   image: $AWS_CLI_IMAGE
   rules:
-    - if $MANAGE_PREREQS == "true"
-    - when: on_success
+    - if: $MANAGE_PREREQS == "true"
+      when: always
+    - when: never
   when: manual
   allow_failure: false
 
