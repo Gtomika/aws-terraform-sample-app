@@ -49,16 +49,18 @@ variables:
 provision-prereqs: # create all infrastructure that is required FOR CI/CD and terraform to be able to function
   extends: .prereqs-job-template
   script:
-    - aws s3api create-bucket --bucket $TERRAFORM_STATE_BUCKET_NAME
-    - aws s3api create-bucket --bucket $ARTIFACTS_BUCKET_NAME
-    - aws s3api create-bucket --bucket $LAMBDA_SOURCE_BUCKET_NAME
+    - aws s3 mb s3://$TERRAFORM_STATE_BUCKET_NAME --region $AWS_DEFAULT_REGION
+    - aws s3 mb s3://$ARTIFACTS_BUCKET_NAME --region $AWS_DEFAULT_REGION
+    - aws s3 mb s3://$LAMBDA_SOURCE_BUCKET_NAME --region $AWS_DEFAULT_REGION
 
 destroy-prereqs: # destroy all prerequisite infrastructure
   extends: .prereqs-job-template
   script:
-    - aws s3 rb s3://$TERRAFORM_STATE_BUCKET_NAME --force
-    - aws s3 rb s3://$ARTIFACTS_BUCKET_NAME --force
-    - aws s3 rb s3://$LAMBDA_SOURCE_BUCKET_NAME --force
+    - aws s3 rb s3://$TERRAFORM_STATE_BUCKET_NAME --force --region $AWS_DEFAULT_REGION
+    - aws s3 rb s3://$ARTIFACTS_BUCKET_NAME --force --region $AWS_DEFAULT_REGION
+    - aws s3 rb s3://$LAMBDA_SOURCE_BUCKET_NAME --force --region $AWS_DEFAULT_REGION
+  needs:
+    - provision-prereqs
 
 build-jar: # package app into runnable JAR
   stage: build
