@@ -24,7 +24,7 @@ variables:
   image: $AWS_CLI_IMAGE
   rules:
     - if: $MANAGE_PREREQS == "true"
-      when: always
+      when: manual
     - when: never
   when: manual
   allow_failure: false
@@ -52,6 +52,7 @@ provision-prereqs: # create all infrastructure that is required FOR CI/CD and te
     - aws s3 mb s3://$TERRAFORM_STATE_BUCKET_NAME --region $AWS_DEFAULT_REGION
     - aws s3 mb s3://$ARTIFACTS_BUCKET_NAME --region $AWS_DEFAULT_REGION
     - aws s3 mb s3://$LAMBDA_SOURCE_BUCKET_NAME --region $AWS_DEFAULT_REGION
+  allow_failure: false
 
 destroy-prereqs: # destroy all prerequisite infrastructure
   extends: .prereqs-job-template
@@ -61,6 +62,7 @@ destroy-prereqs: # destroy all prerequisite infrastructure
     - aws s3 rb s3://$LAMBDA_SOURCE_BUCKET_NAME --force --region $AWS_DEFAULT_REGION
   needs:
     - provision-prereqs
+  allow_failure: true
 
 build-jar: # package app into runnable JAR
   stage: build
@@ -83,7 +85,7 @@ build-lambdas:
   stage: build
   image: $UBUNTU_IMAGE
   script:
-    - sudo apt-get install zip
+    - apt-get --yes --force-yes install zip
     - cd lambda
     - echo Zipping manage book icons lambda, found at lambda/$MANAGE_BOOK_ICONS_LAMBDA_SOURCE
     - zip -r "$MANAGE_BOOK_ICONS_LAMBDA_SOURCE".zip $MANAGE_BOOK_ICONS_LAMBDA_SOURCE
