@@ -136,7 +136,7 @@ upload-lambda: # upload lambda sources as ZIP to s3 bucket
     - aws s3api put-object --bucket $LAMBDA_SOURCE_BUCKET_NAME --key $MANAGE_BOOK_ICONS_VERSIONED_KEY --body ./"$MANAGE_BOOK_ICONS_LAMBDA_SOURCE".zip
     - echo Lambda source code upload successful
   needs:
-    - build-lambdas
+    - zip-lambda
   only:
     - main
 
@@ -164,7 +164,7 @@ delete-lambda:
     - aws s3 rm s3://"$LAMBDA_SOURCE_BUCKET_NAME"/"$MANAGE_BOOK_ICONS_VERSIONED_KEY"
     - echo Source code for manage book lambda removed from s3.
   needs:
-    - upload-lambdas
+    - upload-lambda
   only:
     - main
 

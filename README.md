@@ -38,9 +38,13 @@ Pipeline is defined in the `.gitlab-ci.yml` file.
 
 The following stages are present:
 
- - Build: Creates fat JAR of the application.
+ - Prereqs: Create "prerequisite" infrastructure that is required for further 
+jobs to work. Such as terraform state bucket. This stage is only visible if 
+the CI/CD variable `MANAGE_PREREQS` is provided with true value.
+ - Build: Creates fat JAR of the application, packages AWS lambda functions.
  - Publish: Jobs to upload and delete the JAR to/from the artifacts S3 bucket. 
-The EC2 instance will grab it from this bucket later.
+The EC2 instance will grab it from this bucket later. Also has jobs to upload AWS 
+Lambda deployment packages to S3.
  - Test: Run unit, integration and spotless test.
  - Terraform-plan: Validate terraform config and create plan to apply it.
  - Terraform-deploy: Use the plan to create or destroy the infrastructure.
