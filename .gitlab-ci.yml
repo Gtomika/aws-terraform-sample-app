@@ -18,6 +18,7 @@ variables:
   AWS_CLI_IMAGE: amazon/aws-cli
   TERRAFORM_IMAGE: hashicorp/terraform
   UBUNTU_IMAGE: ubuntu
+  NODE_IMAGE: node
 
 .prereqs-job-template:
   stage: prereqs
@@ -81,21 +82,35 @@ build-jar: # package app into runnable JAR
       - build/libs
     expire_in: 1 hour
 
-build-lambdas:
+install-lambda-dependencies: # install dependencies into node_modules folder (needed for lambda)
+  stage: build
+  image: $NODE_IMAGE
+  script:
+    - cd lambda
+    - echo "//registry.npmjs.org/:_authToken=${NPM_ACCESS_TOKEN}" > .npmrc
+    - npm install
+    - echo Successfully install lambda function dependencies in lambda/node_modules folder
+  artifacts:
+    paths:
+      - lambda
+    expire_in: 1 hour
+
+zip-lambda: # zips lambda source and dependencies, preparing upload to S3
   stage: build
   image: $UBUNTU_IMAGE
   script:
     - apt-get update -y
     - apt-get upgrade -y
     - apt-get -y install zip
-    - cd lambda
-    - echo Zipping manage book icons lambda, found at lambda/$MANAGE_BOOK_ICONS_LAMBDA_SOURCE
-    - zip -r "$MANAGE_BOOK_ICONS_LAMBDA_SOURCE".zip $MANAGE_BOOK_ICONS_LAMBDA_SOURCE
-    - echo Created zipped source code lambda/"$MANAGE_BOOK_ICONS_LAMBDA_SOURCE".zip
+    - echo Zipping manage book icons lambda source and dependencies...
+    - zip -r "$MANAGE_BOOK_ICONS_LAMBDA_SOURCE".zip lambda
+    - echo Created zipped source code "$MANAGE_BOOK_ICONS_LAMBDA_SOURCE".zip
   artifacts:
     paths:
-      - lambda/$MANAGE_BOOK_ICONS_LAMBDA_SOURCE.zip
+      - $MANAGE_BOOK_ICONS_LAMBDA_SOURCE.zip
     expire_in: 1 hour
+  needs:
+    - install-lambda-dependencies
 
 upload-jar: # upload runnable JAR to S3 -> to be downloaded to EC2 instance
   stage: publish
@@ -111,14 +126,14 @@ upload-jar: # upload runnable JAR to S3 -> to be downloaded to EC2 instance
   only:
     - main
 
-upload-lambdas: # upload lambda sources as ZIP to s3 bucket
+upload-lambda: # upload lambda sources as ZIP to s3 bucket
   stage: publish
   image: $AWS_CLI_IMAGE
   script:
-    - echo Zipped source code for manage book icons lambda is expected at lambda/"$MANAGE_BOOK_ICONS_LAMBDA_SOURCE".zip
+    - echo Zipped source code for manage book icons lambda is expected at "$MANAGE_BOOK_ICONS_LAMBDA_SOURCE".zip
     - export MANAGE_BOOK_ICONS_VERSIONED_KEY="$MANAGE_BOOK_ICONS_LAMBDA_SOURCE"_"$CI_COMMIT_SHORT_SHA".zip
     - echo Uploading manage book icons lambda source to S3 bucket $LAMBDA_SOURCE_BUCKET_NAME using key $MANAGE_BOOK_ICONS_VERSIONED_KEY
-    - aws s3api put-object --bucket $LAMBDA_SOURCE_BUCKET_NAME --key $MANAGE_BOOK_ICONS_VERSIONED_KEY --body ./lambda/"$MANAGE_BOOK_ICONS_LAMBDA_SOURCE".zip
+    - aws s3api put-object --bucket $LAMBDA_SOURCE_BUCKET_NAME --key $MANAGE_BOOK_ICONS_VERSIONED_KEY --body ./"$MANAGE_BOOK_ICONS_LAMBDA_SOURCE".zip
     - echo Lambda source code upload successful
   needs:
     - build-lambdas
@@ -140,7 +155,7 @@ delete-jar: # cleanup job -> delete JAR from artifacts bucket
   when: manual
   allow_failure: true
 
-delete-lambdas:
+delete-lambda:
   stage: publish
   image: $AWS_CLI_IMAGE
   script:
