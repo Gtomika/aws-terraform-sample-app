@@ -28,7 +28,7 @@ variable "vpc_id" {
 
 variable "images_bucket" {
   type = object({
-    name = string
+    bucket = string
     arn = string
   })
 }

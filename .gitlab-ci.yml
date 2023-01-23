@@ -167,6 +167,8 @@ delete-lambda:
     - upload-lambda
   only:
     - main
+  when: manual
+  allow_failure: true
 
 spotless-check:
   stage: test
