@@ -5,8 +5,9 @@ The IaC consists of the root module and submodules, located in the
 
  - ``vpc``: Defines network resources for the app.
  - ``s3``: Defines S3 bucket and buckets policies to store book images/icons.
- - ``dynamodb``: Defines DynamoDB table to store book data.
+ - ``dynamodb``: Defines DynamoDB tables to store book data and customers.
  - `lambda`: Lambda function to move book images between buckets.
+ - `sns`: Notifications topic for book API events.
  - `ec2_bastion`: Bastion host to access private instances.
  - ``ec2_app``: Defines the EC2 instance and related configurations. The result will be a launch template.
  - `elasticache`: Memchached cluster for the application.

@@ -1,6 +1,5 @@
 package com.epam.cloudx.aws.controllers.advice;
 
-import com.epam.cloudx.aws.controllers.BookController;
 import com.epam.cloudx.aws.controllers.dto.BookApiErrorResponse;
 import com.epam.cloudx.aws.exceptions.BookApiException;
 import com.epam.cloudx.aws.mappers.ExceptionMapper;
@@ -10,8 +9,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @RequiredArgsConstructor
-@RestControllerAdvice(assignableTypes = BookController.class)
-public class BookControllerAdvice {
+@RestControllerAdvice
+public class BookApiControllerAdvice {
 
     private final ExceptionMapper exceptionMapper;
 

@@ -40,14 +40,36 @@ data aws_iam_policy_document "iam_instance_policy_data" {
     ]
   }
   statement { # Access to the book data DynamoDB table items
-    sid = "FullAccessToTableItems"
+    sid = "FullAccessToBookItems"
     effect = "Allow"
-    resources = [ var.data_table.arn ]
+    resources = [ var.book_data_table.arn ]
     actions = [
       "dynamodb:DescribeTable",
       "dynamodb:Query",
       "dynamodb:Scan",
       "dynamodb:*Item*"
+    ]
+  }
+  statement { # Access to the customer data DynamoDB table items
+    sid = "FullAccessToCustomerItems"
+    effect = "Allow"
+    resources = [ var.customer_data_table.arn ]
+    actions = [
+      "dynamodb:DescribeTable",
+      "dynamodb:Query",
+      "dynamodb:Scan",
+      "dynamodb:*Item*"
+    ]
+  }
+  statement { # SNS topic actions
+    sid = "BookNotificationsTopicAccess"
+    effect = "Allow"
+    resources = [ var.book_api_notification_topic_arn ]
+    actions = [
+      "sns:Get*",
+      "sns:List*",
+      "sns:Subscribe",
+      "sns:Publish"
     ]
   }
   statement { # to be able to download app JAR

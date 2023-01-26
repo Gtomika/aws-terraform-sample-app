@@ -85,6 +85,17 @@ variable "book_data_table_key" {
   description = "Hash key of the 'book_data_table_name' table"
 }
 
+variable "customer_data_table_name" {
+  type = string
+  description = "DynamoDB table name of customer data table"
+}
+
+variable "customer_data_table_key" {
+  type = string
+  description = "Hash key of the 'customer_data_table_name' table"
+}
+
+
 variable "my_ip" {
   type = string
   description = "My IPv4 address, used to limit SSH to this address"

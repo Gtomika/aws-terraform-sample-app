@@ -10,10 +10,18 @@ variable "aws_region" {
   type = string
 }
 
-variable "table_name" {
+variable "book_data_table_name" {
   type = string
 }
 
-variable "hash_key_name" {
+variable "book_data_hash_key_name" {
+  type = string
+}
+
+variable "customer_data_table_name" {
+  type = string
+}
+
+variable "customer_data_hash_key_name" {
   type = string
 }

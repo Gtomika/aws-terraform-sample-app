@@ -7,10 +7,12 @@ aws s3 cp s3://${artifacts_bucket_name}/${application_artifact_name} ${applicati
 export APP_ENVIRONMENT="${environment}"
 export APP_PORT="${application_port}"
 export APP_AWS_REGION="${aws_region}"
-export APP_AWS_DYNAMODB_BOOK_DATA_TABLE_NAME="${data_table_name}"
+export APP_AWS_DYNAMODB_BOOK_DATA_TABLE_NAME="${book_data_table_name}"
+export APP_AWS_DYNAMODB_CUSTOMER_DATA_TABLE_NAME="${customer_data_table_name}"
 export APP_AWS_S3_BOOK_IMAGES_BUCKET_URL="https://${images_bucket_name}.s3.${aws_region}.amazonaws.com"
 export APP_AWS_S3_BOOK_IMAGES_BUCKET_NAME="${images_bucket_name}"
 export APP_AWS_ELASTICACHE_CLUSTER_URL="${cache_cluster_private_dns}"
 export APP_AWS_ELASTICACHE_CLUSTER_PORT="${cache_cluster_port}"
 export APP_AWS_ELASTICACHE_CLUSTER_TTL="${book_cache_ttl}"
+export APP_AWS_SNS_NOTIFICATIONS_TOPIC_ARN="${book_api_notification_topic_arn}"
 java -jar ${application_artifact_name}

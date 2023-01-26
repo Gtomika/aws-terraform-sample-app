@@ -4,7 +4,7 @@ import static com.epam.cloudx.aws.utils.BookTestUtils.testBook;
 import static org.junit.jupiter.api.Assertions.*;
 
 import com.epam.cloudx.aws.domain.Book;
-import com.epam.cloudx.aws.exceptions.BookValidationException;
+import com.epam.cloudx.aws.exceptions.ValidationException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -29,7 +29,7 @@ class BookValidatorServiceTest {
         Book book = testBook();
         book.setAuthor(null);
         book.setPublishYear(1700);
-        BookValidationException e = assertThrows(BookValidationException.class,
+        ValidationException e = assertThrows(ValidationException.class,
                 () -> validator.validateBookCreateRequest(book));
         assertEquals(2, e.getErrorContext().size());
     }
@@ -43,7 +43,7 @@ class BookValidatorServiceTest {
     @Test
     public void shouldNotAcceptInvalidBookUpdateRequest() {
         Book book = testBook();
-        BookValidationException e = assertThrows(BookValidationException.class,
+        ValidationException e = assertThrows(ValidationException.class,
                 () -> validator.validateBookUpdateRequest("85-359-0277-5", book));
         assertEquals(1, e.getErrorContext().size());
     }

@@ -1,6 +1,7 @@
 package com.epam.cloudx.aws.configs;
 
 import com.epam.cloudx.aws.domain.Book;
+import com.epam.cloudx.aws.domain.Customer;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -20,6 +21,9 @@ public class DynamoDbConfig {
 
     @Value("${infrastructure.book-data-table.name}")
     private String bookTableName;
+
+    @Value("${infrastructure.customer-data-table.name}")
+    private String customerTableName;
 
     /**
      * <ul>
@@ -43,6 +47,11 @@ public class DynamoDbConfig {
     @Bean
     public DynamoDbTable<Book> bookTable() {
         return dynamoDbClient().table(bookTableName, TableSchema.fromBean(Book.class));
+    }
+
+    @Bean
+    public DynamoDbTable<Customer> customerTable() {
+        return dynamoDbClient().table(customerTableName, TableSchema.fromBean(Customer.class));
     }
 
 }

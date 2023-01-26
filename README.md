@@ -3,7 +3,7 @@
 Simple Book API that uses several AWS components:
 
  - VPC, subnets, internet gateway, VPC endpoints, route tables.
- - DynamoDB table to store book data.
+ - DynamoDB tables to store book data and customers.
  - S3 buckets to store book cover images/icons (included bucket policy).
  - EC2 launch template.
  - IAM role and policy for the app with the principle of the least privilege.
@@ -11,6 +11,7 @@ Simple Book API that uses several AWS components:
  - Auto-scaling group (using launch template).
  - ElastiCache cluster (Memcached engine).
  - Lambda function to move images between buckets.
+ - SNS notifications to emails
 
 All of these resources are provisioned using Terraform, which is applied through the 
 GitLab CI/CD pipeline. By default, the resources **are in a destroyed state** because 

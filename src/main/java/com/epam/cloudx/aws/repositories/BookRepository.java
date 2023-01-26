@@ -1,11 +1,10 @@
 package com.epam.cloudx.aws.repositories;
 
 import com.epam.cloudx.aws.domain.Book;
-import com.epam.cloudx.aws.exceptions.BookApiException;
 import com.epam.cloudx.aws.exceptions.BookNotFoundException;
+import com.epam.cloudx.aws.utils.BookApiUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Repository;
 import software.amazon.awssdk.core.exception.SdkException;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
@@ -23,7 +22,7 @@ public class BookRepository {
             Book book = bookTable.getItem(keyFromIsbn(isbn));
             return book != null;
         } catch (SdkException e) {
-            logAndThrow("Error while checking book existence", e);
+            BookApiUtils.logAndThrowInternalError("Error while checking book existence", e);
             return false;
         }
     }
@@ -36,7 +35,7 @@ public class BookRepository {
             }
             return book;
         } catch (SdkException e) {
-            logAndThrow("Error while fetching book", e);
+            BookApiUtils.logAndThrowInternalError("Error while fetching book", e);
             return null;
         }
     }
@@ -46,7 +45,7 @@ public class BookRepository {
             bookTable.putItem(book);
             return book;
         } catch (SdkException e) {
-            logAndThrow("Error create/update of book", e);
+            BookApiUtils.logAndThrowInternalError("Error create/update of book", e);
             return null;
         }
     }
@@ -55,7 +54,7 @@ public class BookRepository {
         try {
             bookTable.deleteItem(keyFromIsbn(isbn));
         } catch (SdkException e) {
-            logAndThrow("Error while deleting book", e);
+            BookApiUtils.logAndThrowInternalError("Error while deleting book", e);
         }
     }
 
@@ -63,11 +62,6 @@ public class BookRepository {
         return Key.builder()
                 .partitionValue(isbn)
                 .build();
-    }
-
-    private void logAndThrow(String message, SdkException e) {
-        log.error(message, e);
-        throw new BookApiException(message, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
 }

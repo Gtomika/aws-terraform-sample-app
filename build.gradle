@@ -52,6 +52,7 @@ dependencies {
 	implementation 'software.amazon.awssdk:s3'
 	implementation 'software.amazon.awssdk:dynamodb-enhanced'
 	implementation 'software.amazon.awssdk:regions'
+	implementation 'software.amazon.awssdk:sns'
 
 	//Cache
 	implementation 'net.spy:spymemcached:' + memcachedClientVersion

@@ -10,8 +10,11 @@ infrastructure:
   # endpoints of the localstack services
   s3-localstack-endpoint: http://localhost:4566
   dynamodb-localstack-endpoint: http://localhost:4566
+  sns-localstack-endpoint: http://localhost:4566
   book-data-table:
     name: EpamCloudxBookData
+  customer-data-table:
+    name: EpamCloudxCustomerData
   book-images-bucket:
     url: http://localhost:4566/s3/epam-cloudx-book-cover-images
     name: epam-cloudx-book-cover-images
@@ -19,10 +22,15 @@ infrastructure:
     url: localhost
     port: 11211
     time-to-live: 60 # in seconds
+  book-notifications-topic:
+    arn: arn:aws:sns:eu-central-1:000000000000:epam-cloudx-book-notifications
 
 book-api:
   validation:
     min-published-year: 1800
+  message-templates:
+    book-added: A new book is available! It is %s, written by %s.
+    book-removed: A book is no longer available! It was %s, written by %s.
 
 logging:
   level:

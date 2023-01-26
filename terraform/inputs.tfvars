@@ -23,6 +23,8 @@ book_icons_bucket_name = "tamas-gaspar-epam-cloudx-book-icons"
 # DynamoDB
 book_data_table_name = "TamasGasparEpamCloudxBookData"
 book_data_table_key = "isbn"
+customer_data_table_name="TamasGasparEpamCloudxCustomers"
+customer_data_table_key="id"
 
 # Lambda source bucket and key come from Ci/Cd pipeline
 

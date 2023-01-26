@@ -1,7 +1,7 @@
 package com.epam.cloudx.aws.services;
 
 import com.epam.cloudx.aws.domain.Book;
-import com.epam.cloudx.aws.exceptions.BookValidationException;
+import com.epam.cloudx.aws.exceptions.ValidationException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -21,7 +21,7 @@ public class BookValidatorService {
     /**
      * @param book Book that will be created, if validation is successful.
      */
-    public void validateBookCreateRequest(Book book) throws BookValidationException {
+    public void validateBookCreateRequest(Book book) throws ValidationException {
         var errorContext = new ArrayList<String>();
         commonBookValidations(book, errorContext);
         throwIfInvalid("Validation for book creation has failed", errorContext);
@@ -31,7 +31,7 @@ public class BookValidatorService {
      * @param isbn ISBN provided in the path of the request.
      * @param book Updated state of the book to be validated.
      */
-    public void validateBookUpdateRequest(String isbn, Book book) throws BookValidationException {
+    public void validateBookUpdateRequest(String isbn, Book book) throws ValidationException {
         var errorContext = new ArrayList<String>();
         commonBookValidations(book, errorContext);
         if(!StringUtils.equals(isbn, book.getIsbn())) errorContext.add("ISBN of the book cannot be updated");
@@ -50,7 +50,7 @@ public class BookValidatorService {
 
     private void throwIfInvalid(String message, List<String> errorContext) {
         if(!errorContext.isEmpty()) {
-            throw new BookValidationException(message, errorContext);
+            throw new ValidationException(message, errorContext);
         }
     }
 

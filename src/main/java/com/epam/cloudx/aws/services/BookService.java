@@ -11,7 +11,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -25,6 +27,13 @@ public class BookService {
     private final BookValidatorService bookValidatorService;
     private final BookImagesService bookImagesService;
     private final BookCacheRepository bookCacheRepository;
+    private final BookNotificationsService bookNotificationsService;
+
+    @Setter(onMethod_ = {@Value("${book-api.message-templates.book-added}")})
+    private String bookAddedTemplate;
+
+    @Setter(onMethod_ = {@Value("${book-api.message-templates.book-removed}")})
+    private String bookRemovedTemplate;
 
     /**
      * Attempt to get book from the cache first, if that fails
@@ -46,8 +55,15 @@ public class BookService {
     public Book createBook(Book book) {
         bookValidatorService.validateBookCreateRequest(book);
         if(!bookRepository.existsByIsbn(book.getIsbn())) {
-            log.info("New book created: {}", book);
-            return bookRepository.createOrUpdateBook(book);
+            Book savedBook = bookRepository.createOrUpdateBook(book);
+
+            //publish email to customers
+            bookNotificationsService.sendBookNotification(
+                    String.format(bookAddedTemplate, savedBook.getTitle(), savedBook.getAuthor())
+            );
+
+            log.info("New book created: {}", savedBook);
+            return savedBook;
         } else {
             throw new BookDuplicationException(book.getIsbn());
         }
@@ -94,6 +110,12 @@ public class BookService {
         bookRepository.deleteBook(isbn);
         //also clear from cache
         bookCacheRepository.clearCachedBook(isbn);
+
+        //publish notification about removal
+        bookNotificationsService.sendBookNotification(
+                String.format(bookRemovedTemplate, book.getTitle(), book.getAuthor())
+        );
+
         log.info("Deleted book: {}", book);
     }
 

@@ -42,6 +42,9 @@ class BookServiceTest {
     @Mock
     private BookCacheRepository bookCacheRepository;
 
+    @Mock
+    private BookNotificationsService bookNotificationsService;
+
     private BookService bookService;
 
     @BeforeEach
@@ -50,8 +53,11 @@ class BookServiceTest {
                 bookRepository,
                 bookValidatorService,
                 bookImagesService,
-                bookCacheRepository
+                bookCacheRepository,
+                bookNotificationsService
         );
+        bookService.setBookAddedTemplate("%s %s");
+        bookService.setBookRemovedTemplate("%s %s");
     }
 
     @Test

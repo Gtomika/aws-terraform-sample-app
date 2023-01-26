@@ -11,3 +11,12 @@ awslocal dynamodb create-table \
     --key-schema AttributeName=isbn,KeyType=HASH \
     --provisioned-throughput ReadCapacityUnits=5,WriteCapacityUnits=5
 
+echo "Creating customer data Dynamo DB table"
+awslocal dynamodb create-table \
+    --table-name EpamCloudxCustomerData \
+    --attribute-definitions AttributeName=id,AttributeType=S \
+    --key-schema AttributeName=id,KeyType=HASH \
+    --provisioned-throughput ReadCapacityUnits=5,WriteCapacityUnits=5
+
+echo "Create SNS topic for customer emails"
+awslocal sns create-topic --name epam-cloudx-book-notifications
