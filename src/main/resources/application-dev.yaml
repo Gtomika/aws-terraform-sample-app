@@ -12,18 +12,18 @@ infrastructure:
   dynamodb-localstack-endpoint: http://localhost:4566
   sns-localstack-endpoint: http://localhost:4566
   book-data-table:
-    name: EpamCloudxBookData
+    name: CloudxBookData
   customer-data-table:
-    name: EpamCloudxCustomerData
+    name: CloudxCustomerData
   book-images-bucket:
-    url: http://localhost:4566/s3/epam-cloudx-book-cover-images
-    name: epam-cloudx-book-cover-images
+    url: http://localhost:4566/s3/cloudx-book-cover-images
+    name: cloudx-book-cover-images
   elasticache-cluster:
     url: localhost
     port: 11211
     time-to-live: 60 # in seconds
   book-notifications-topic:
-    arn: arn:aws:sns:eu-central-1:000000000000:epam-cloudx-book-notifications
+    arn: arn:aws:sns:eu-central-1:000000000000:cloudx-book-notifications
 
 book-api:
   validation:
@@ -34,6 +34,6 @@ book-api:
 
 logging:
   level:
-    com.epam.cloudx.aws: DEBUG
+    com.gaspar.cloudx.aws: DEBUG
   file:
     path: .

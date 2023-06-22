@@ -3,4 +3,4 @@ server:
 
 logging:
   level:
-    com.epam.cloudx.aws: DEBUG
+    com.gaspar.cloudx.aws: DEBUG

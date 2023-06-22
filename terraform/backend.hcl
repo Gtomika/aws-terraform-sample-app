@@ -1,3 +1,3 @@
 bucket = "tamas-gaspar-epam-cloudx-terraform-state"
-key = "EpamCloudxAwsApp"
+key = "CloudxAwsApp"
 region = "eu-central-1"

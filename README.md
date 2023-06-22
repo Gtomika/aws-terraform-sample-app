@@ -33,7 +33,10 @@ node count, some private subnets may not have any instances.
 
 ## CI/CD
 
-Pipeline is defined in the `.gitlab-ci.yml` file.
+Pipeline is defined in the `.gitlab-ci.yml` file. This project was 
+migrated from GitLab, so the CI/CD is defined in GitLab format. I 
+have no plans of change to GitHub actions, since that would be time 
+consuming and this project is not actively maintained.
 
 ![pipeline.png](images/pipeline.png)
 
@@ -49,8 +52,6 @@ Lambda deployment packages to S3.
  - Test: Run unit, integration and spotless test.
  - Terraform-plan: Validate terraform config and create plan to apply it.
  - Terraform-deploy: Use the plan to create or destroy the infrastructure.
-
-[Example of a passed pipeline](https://git.epam.com/tamas_gaspar2/aws-sample-app/-/pipelines/2651751).
 
 ## Possible improvements
 

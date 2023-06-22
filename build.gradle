@@ -6,7 +6,7 @@ plugins {
 	id 'org.unbroken-dome.test-sets' version '4.0.0'
 }
 
-group = 'com.epam.cloudx.aws'
+group = 'com.gaspar.cloudx.aws'
 // TODO this version is not used in the build/deployment process
 // TODO instead the commit ID is used to simplify CI/CD
 // TODO find way to read this value and use it
